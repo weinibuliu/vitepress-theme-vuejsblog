@@ -18,6 +18,28 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const dist = path.join(root, 'playground/.vitepress/dist')
 
 /**
+ * Where the playground is deployed, as two separate facts.
+ *
+ * The origin and the mount path are stated in different places — `themeConfig.blog.baseUrl`
+ * and VitePress's `base` — and keeping them apart is the whole point of the checks below:
+ * every URL the build writes is one of the two prefixed to a path, so a build that conflates
+ * them links to a directory that does not exist. Both are written here rather than read back
+ * out of a built file, because an assertion that asks the build what the build did cannot
+ * catch a wrong prefix.
+ */
+const ORIGIN = 'https://weinibuliu.github.io'
+const BASE = '/vitepress-theme-vuejsblog/'
+
+/**
+ * A deployed URL in the form the Site's own content writes it, so that the checks about
+ * *which* Posts the build published do not each restate the prefix. The prefix is asserted
+ * separately, against the URLs as they were written.
+ */
+function siteRelative(url) {
+  return url.startsWith(BASE) ? url.slice(BASE.length - 1) : url
+}
+
+/**
  * Fixtures the playground adds on top of the reference site's real content.
  *
  * Both live under `docs/demo/`, which the playground's Collection Scope
@@ -108,7 +130,9 @@ section('Blog index')
 const listedLinkMatches = [
   ...home.matchAll(/class="vp-blog-content-list-link" href="([^"]+)"/g)
 ]
-const listedPosts = [...new Set(listedLinkMatches.map((m) => m[1]))]
+const listedPosts = [
+  ...new Set(listedLinkMatches.map((m) => siteRelative(m[1])))
+]
 const titleLinkCount = [...home.matchAll(/class="vp-blog-content-list-link"/g)]
   .length
 check('lists Posts', listedPosts.length > 0, `found ${listedPosts.length}`)
@@ -116,6 +140,15 @@ check(
   'lists each Post once',
   titleLinkCount === listedPosts.length,
   `${titleLinkCount} title links for ${listedPosts.length} Posts`
+)
+check(
+  'every listed Post link is mounted under the Site base',
+  listedLinkMatches.length > 0 &&
+    listedLinkMatches.every((match) => match[1].startsWith(BASE)),
+  listedLinkMatches
+    .map((match) => match[1])
+    .filter((href) => !href.startsWith(BASE))
+    .join(', ')
 )
 check(
   'leaves a Draft out of the list',
@@ -151,9 +184,12 @@ check(
 
 section('Feed')
 check('a Feed was generated', feed.length > 0)
+// The Feed's URLs are absolute, so the comparison is made against the same Site-relative form
+// the fixtures are written in. The prefix those URLs carry is asserted just below.
+const feedRelative = feed.split(`${ORIGIN}${BASE}`).join('/')
 check(
   'Feed carries neither a Draft nor an excluded file',
-  !feed.includes(DRAFT.url) && !feed.includes(EXCLUDED.url)
+  !feedRelative.includes(DRAFT.url) && !feedRelative.includes(EXCLUDED.url)
 )
 const items = (feed.match(/<item>/g) ?? []).length
 check(
@@ -162,6 +198,34 @@ check(
   `${items} items vs ${listedPosts.length} Posts`
 )
 check('Feed links are absolute', feed.includes('<link>https://'))
+
+/**
+ * Every URL the Feed carries: the channel's `link`, each item's `link` and `guid`, and the
+ * channel image's `url`.
+ */
+const feedUrls = [
+  ...feed.matchAll(/<(?:link|guid|url)>([^<]+)<\/(?:link|guid|url)>/g)
+].map((match) => match[1])
+
+/**
+ * The base, as one directory name, so a URL can be asked how many times it names it.
+ *
+ * This is the check the Feed needed and did not have. `baseUrl` used to be read as "the URL of
+ * the base": the playground wrote the mount path into it as well, the Theme appended `base`,
+ * and every link in the Feed named `/vitepress-theme-vuejsblog/vitepress-theme-vuejsblog/`.
+ * The Feed stayed valid XML throughout, which is why nothing but counting occurrences catches
+ * it — "is it absolute" and "is there a `//`" both pass on a URL with a doubled directory.
+ */
+const BASE_SEGMENT = BASE.replace(/^\/+|\/+$/g, '')
+const namesBaseOnce = (url) => url.split(BASE_SEGMENT).length === 2
+check(
+  'every Feed URL is absolute and names the Site base exactly once',
+  feedUrls.length > 0 &&
+    feedUrls.every((url) => url.startsWith(ORIGIN) && namesBaseOnce(url)),
+  feedUrls
+    .filter((url) => !url.startsWith(ORIGIN) || !namesBaseOnce(url))
+    .join(', ')
+)
 check(
   'Feed links do not double a slash after the origin',
   !/https:\/\/[^<]*[^:/]\/\//.test(feed)
@@ -171,12 +235,14 @@ check('Feed declares a language', /<language>[^<]+<\/language>/.test(feed))
 // `feed`'s RSS renderer silently drops an author that has no email, which is the usual
 // case for a blog, so the Theme adds the creators itself. Silence is the failure mode
 // here — the Feed stays valid and simply has no authors — so this is asserted, not assumed.
-// A Site-relative logo has to be absolutised for the Feed. The other half — a logo that is
-// already a full URL must not be prefixed again — is asserted in verify-package, which builds
-// a Site that has one.
+// A Site-relative logo has to be absolutised for the Feed, and under the base rather than at
+// the origin: `/logo.svg` is served from the mount path like every other asset. The other half
+// — a logo that is already a full URL must not be prefixed again — is asserted in
+// verify-package, which builds a Site that has one.
 check(
-  'the Feed absolutises a site-relative logo rather than dropping it',
-  /<url>https:\/\/blog\.vuejs\.org\/logo\.svg<\/url>/.test(feed)
+  'the Feed absolutises a site-relative logo under the Site base',
+  feed.includes(`<url>${ORIGIN}${BASE}logo.svg</url>`),
+  feed.match(/<url>[^<]*<\/url>/)?.[0]
 )
 
 const feedItems = feed.split('<item>').slice(1)
@@ -286,12 +352,22 @@ section('Post navigation')
 const NAV_LINK =
   /vp-blog-content-post-nav-title">(Next|Previous) Article<\/h2><a class="vp-blog-link" href="([^"]+)"/g
 
-/** The navigation links a built Post page carries, by the labels they are under. */
+/**
+ * Every navigation href as the document wrote it, before `siteRelative` strips the prefix. The
+ * chain below is checked in Site-relative terms; this is what keeps the prefix itself asserted.
+ */
+const rawNavHrefs = []
+
+/**
+ * The navigation links a built Post page carries, by the labels they are under, in the
+ * Site-relative form the rest of this section reasons in.
+ */
 function navLinks(url) {
   const links = { next: undefined, previous: undefined }
   for (const [, label, href] of read(`${url}.html`).matchAll(NAV_LINK)) {
-    if (label === 'Next') links.next = href
-    else links.previous = href
+    rawNavHrefs.push(href)
+    if (label === 'Next') links.next = siteRelative(href)
+    else links.previous = siteRelative(href)
   }
   return links
 }
@@ -299,6 +375,12 @@ function navLinks(url) {
 const navigation = new Map(listedPosts.map((url) => [url, navLinks(url)]))
 const chainStarts = listedPosts.filter((url) => !navigation.get(url).previous)
 const chainEnds = listedPosts.filter((url) => !navigation.get(url).next)
+
+check(
+  'every Post navigation link is mounted under the Site base',
+  rawNavHrefs.length > 0 && rawNavHrefs.every((href) => href.startsWith(BASE)),
+  rawNavHrefs.filter((href) => !href.startsWith(BASE)).join(', ')
+)
 
 check(
   'the Blog is one chain: exactly one Post starts it and one ends it',
@@ -381,7 +463,13 @@ check(
     middle.previous === '/posts/hello-2021',
   JSON.stringify(middle)
 )
-check('every Post links back to the Blog', guest.includes('Back to the blog'))
+// "Back to the blog" is `/`, which is the mount path and not the domain root: on this Site the
+// two are different pages, and only one of them is the Blog.
+check(
+  'every Post links back to the Blog, under the Site base',
+  guest.includes(`class="vp-blog-link" href="${BASE}"`) &&
+    guest.includes('Back to the blog')
+)
 
 section('TOC')
 // A Post's TOC is a tree the build collects and the components render — `markdown.headers`
@@ -508,6 +596,44 @@ check(
   navTexts.join('|') === ['Github', 'RSS Feed'].join('|'),
   navTexts.join(', ')
 )
+// Where a link points is the half its text cannot state. A Site writes its nav in Site-relative
+// paths — `/feed.rss` — and VitePress's `base` is what turns those into deployed URLs. A Theme
+// that passes them through renders them at the domain root, where nothing is.
+const navAnchors = [
+  ...navHtml.matchAll(
+    /<a\b[^>]*class="[^"]*\bvp-blog-layout-nav-link\b[^"]*"[^>]*>/g
+  )
+].map((match) => match[0])
+const navHrefs = navAnchors.map(
+  (anchor) => anchor.match(/href="([^"]+)"/)?.[1] ?? ''
+)
+check(
+  'every internal nav link is mounted under the Site base',
+  navHrefs.length > 0 &&
+    navHrefs.every(
+      (href) => href.startsWith('https://') || href.startsWith(BASE)
+    ),
+  navHrefs.join(', ')
+)
+check(
+  'the RSS nav link reaches the Feed the build wrote',
+  navHrefs.includes(`${BASE}feed.rss`),
+  navHrefs.join(', ')
+)
+// The one check a href cannot make. VitePress's client router handles every same-origin link
+// itself unless its anchor carries `target` (`router.js`: `link.hasAttribute("target")` returns
+// early), and it decides a URL is a page route from a list of extensions that does not include
+// `.rss`. So an internal Feed link is rendered as a route and the reader gets the 404 component
+// — with a 200, because the document was already loaded and never reloads. The Feed file being
+// correct is what makes this look like a routing bug rather than a Feed bug.
+const rssAnchor = navAnchors.find((anchor) =>
+  anchor.includes(`href="${BASE}feed.rss"`)
+)
+check(
+  'the Feed link carries a target, so the router lets the browser fetch it',
+  Boolean(rssAnchor && /\btarget="/.test(rssAnchor)),
+  rssAnchor ?? 'no Feed link in the nav'
+)
 // The reference site has no site footer, so this playground has none either. Footer
 // rendering is covered by `verify-package.mjs`, whose consuming Site configures one.
 check(
@@ -518,10 +644,23 @@ check(
 section('Document and chrome')
 // VitePress declares no favicon at all, so before this the tab icon existed only because
 // browsers probe /favicon.ico on their own and the playground happens to have one. Stating it
-// is what makes it controllable.
+// is what makes it controllable — and it has to be stated under the mount path, because that
+// is where the file is served from.
 check(
   'declares the favicon, defaulted rather than left to browser convention',
-  home.includes('<link rel="icon" href="/favicon.ico">')
+  home.includes(`<link rel="icon" href="${BASE}favicon.ico">`),
+  home.match(/<link rel="icon"[^>]*>/)?.[0]
+)
+// The general form of the rule the checks above sample. `base` is the only place the mount path
+// is stated, so an internal URL that leaves it out points at somebody else's page — or at
+// nothing at all, which is what `/feed.rss` and `/favicon.ico` did on this Site.
+const looseInternalUrls = [...home.matchAll(/(?:href|src)="(\/[^/][^"]*)"/g)]
+  .map((match) => match[1])
+  .filter((url) => !url.startsWith(BASE))
+check(
+  'no internal URL in the document leaves out the Site base',
+  looseInternalUrls.length === 0,
+  looseInternalUrls.join(', ')
 )
 // The brand label is hidden on the index (the H1 carries the title) and below 768px. That is
 // right when a logo is there to be the brand, and wrong when there is not — which is the case
@@ -529,6 +668,16 @@ check(
 // that does have a logo must not start repeating its title on the index.
 const brandOf = (page) =>
   page.match(/<a class="vp-blog-layout-brand"[\s\S]*?<\/a>/)?.[0] ?? ''
+check(
+  'the brand link is mounted under the Site base',
+  brandOf(home).includes(`href="${BASE}"`),
+  brandOf(home).match(/href="[^"]*"/)?.[0]
+)
+check(
+  'the logo is served from under the Site base, with no doubled slash',
+  brandOf(home).includes(`src="${BASE}logo.svg"`),
+  brandOf(home).match(/src="[^"]*"/)?.[0]
+)
 check(
   'a Site with a logo shows it alone on the index',
   brandOf(home).includes('vp-blog-layout-logo') &&

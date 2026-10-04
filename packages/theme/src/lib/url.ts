@@ -1,16 +1,60 @@
 import type { Route } from 'vitepress'
 
 /**
- * `url` as an absolute URL, resolving a site-relative path against `baseUrl`.
+ * `path` placed under `prefix` with exactly one `/` between them.
  *
- * A Feed needs absolute URLs, and both `logo` and `favicon` accept either a site-relative
- * path — `/logo.svg`, which is what the reference site uses — or a full URL, for an asset on
- * a CDN. Prefixing unconditionally turned the second case into
- * `https://blog.examplehttps://cdn.example/logo.svg`, and RSS 2.0 writes that straight into
- * the channel's `<image>`.
+ * Where a Site lives is stated once — VitePress's `base` — and the Theme's origin is stated
+ * once, in `themeConfig.blog.baseUrl`. Every URL the Theme emits is one of those prefixes
+ * followed by a path, and the two cannot be joined with `+`: VitePress's `base` ends with `/`
+ * by its own convention and a Site's paths begin with `/`, so plain concatenation produces
+ * `//logo.svg` in the document and a doubled directory in the Feed.
+ *
+ * An empty `prefix` leaves `path` as written — the case `genFeed`'s `allowMissingBaseUrl`
+ * creates, where there is no origin to place in front of the path.
  */
-export function absoluteUrl(url: string, baseUrl: string): string {
-  return /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(url) ? url : `${baseUrl}${url}`
+export function joinUrl(prefix: string, path: string): string {
+  return prefix
+    ? `${prefix.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`
+    : path
+}
+
+/**
+ * The origin `baseUrl` states, with the Site's `base` removed when the Site wrote it twice.
+ *
+ * `baseUrl` is documented as an origin, and the Theme appends VitePress's `base` to it for the
+ * Feed's absolute links. A Site that reads the field's name as "the URL of the base" writes
+ * `https://example.com/blog` — and then both are appended, so every link in the Feed names a
+ * directory that does not exist. The repetition is reported rather than silently resolved: an
+ * address is the one thing a Feed cannot be wrong about.
+ */
+export function withoutDoubledBase(
+  origin: string,
+  base: string
+): { origin: string; duplicated: boolean } {
+  const trimmed = origin.replace(/\/+$/, '')
+  const path = base.replace(/^\/+|\/+$/g, '')
+  if (!path) return { origin: trimmed, duplicated: false }
+
+  const suffix = `/${path}`
+  return trimmed.endsWith(suffix)
+    ? { origin: trimmed.slice(0, -suffix.length), duplicated: true }
+    : { origin: trimmed, duplicated: false }
+}
+
+/**
+ * `url` as an absolute URL, resolving a site-relative path against `prefix`.
+ *
+ * `prefix` is an origin — `https://blog.example` — when the answer has to stand on its own,
+ * because an RSS reader parses the Feed away from the Site, or the Site's own `base` when the
+ * document supplies the origin instead.
+ *
+ * Both `logo` and `favicon` accept either a site-relative path — `/logo.svg`, which is what
+ * the reference site uses — or a full URL, for an asset on a CDN. Prefixing unconditionally
+ * turned the second case into `https://blog.examplehttps://cdn.example/logo.svg`, and RSS 2.0
+ * writes that straight into the channel's `<image>`.
+ */
+export function absoluteUrl(url: string, prefix: string): string {
+  return /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(url) ? url : joinUrl(prefix, url)
 }
 
 /**

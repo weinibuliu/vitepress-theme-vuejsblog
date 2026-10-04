@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs'
 import { Feed } from 'feed'
 import { createContentLoader, type SiteConfig } from 'vitepress'
 import { resolvePosts } from './lib/resolvePosts.js'
-import { absoluteUrl } from './lib/url.js'
+import { absoluteUrl, joinUrl, withoutDoubledBase } from './lib/url.js'
 import { readThemeConfig } from './lib/config.js'
 import type {
   FeedOptions,
@@ -83,7 +83,8 @@ export async function genFeed(
   const rendered = await renderFeed({
     blog,
     srcDir: config.srcDir,
-    siteBase: config.site.base
+    siteBase: config.site.base,
+    warn: (message) => config.logger.warn(message)
   })
 
   if (!rendered) return
@@ -146,14 +147,19 @@ export interface RenderFeedArgs {
   blog: ResolvedBlogConfig
   srcDir: string
   siteBase: string
+  /**
+   * Told when the Site's config leaves the Feed's addresses doubtful.
+   *
+   * There is one such case: a `baseUrl` that already carries the Site's `base`. Appending the
+   * base again would publish links to a directory that does not exist, so the repetition is
+   * dropped — but the Site did ask for it, and a Feed's addresses are the one thing it cannot
+   * be wrong about, so the disagreement is reported rather than passed over.
+   */
+  warn?: (message: string) => void
 }
 
 /**
- * Build the Feed object from the Theme's own Post collection, or `undefined` when
- * there is nothing to publish.
- *
- * Exported so that a Site can compose its own `buildEnd` without re-implementing
- * item construction.
+ * A Feed and the Posts it was built from.
  */
 export interface RenderedFeed {
   feed: Feed
@@ -167,10 +173,18 @@ export interface RenderedFeed {
   posts: Post[]
 }
 
+/**
+ * Build the Feed object from the Theme's own Post collection, or `undefined` when
+ * there is nothing to publish.
+ *
+ * Exported so that a Site can compose its own `buildEnd` without re-implementing
+ * item construction.
+ */
 export async function renderFeed({
   blog,
   srcDir,
-  siteBase
+  siteBase,
+  warn
 }: RenderFeedArgs): Promise<RenderedFeed | undefined> {
   const raw = await createContentLoader(blog.posts, {
     excerpt: blog.excerptSeparator
@@ -180,8 +194,23 @@ export async function renderFeed({
   if (!posts.length) return undefined
 
   const feedOptions = feedOptionsOf(blog)
-  const baseUrl = (blog.baseUrl ?? '').replace(/\/+$/, '')
-  const link = `${baseUrl}${siteBase}`
+  const { origin, duplicated } = withoutDoubledBase(
+    blog.baseUrl ?? '',
+    siteBase
+  )
+  if (duplicated) {
+    warn?.(
+      '[blog] themeConfig.blog.baseUrl already ends with the Site base, so it was ' +
+        `not added a second time. baseUrl is the Site origin alone, e.g. ` +
+        `"https://example.com" — the mount path comes from VitePress's base ` +
+        `("${siteBase}").`
+    )
+  }
+
+  // The origin plus the mount path. Where the Site lives is stated once, by VitePress, so
+  // every URL the Feed carries is built from the two rather than from a Site-authored prefix.
+  const prefix = joinUrl(origin, siteBase)
+  const link = joinUrl(prefix, '/')
 
   const feed = new Feed({
     title: blog.title,
@@ -190,16 +219,17 @@ export async function renderFeed({
     link,
     language: feedOptions.language,
     copyright: feedOptions.copyright ?? '',
-    image: blog.logo ? absoluteUrl(blog.logo, baseUrl) : undefined,
-    favicon: absoluteUrl(blog.favicon, baseUrl),
+    image: blog.logo ? absoluteUrl(blog.logo, prefix) : undefined,
+    favicon: absoluteUrl(blog.favicon, prefix),
     updated: new Date(posts[0].time)
   })
 
   for (const post of posts) {
+    const url = joinUrl(prefix, post.url)
     feed.addItem({
       title: post.title,
-      id: `${baseUrl}${siteBase}${post.url.replace(/^\//, '')}`,
-      link: `${baseUrl}${siteBase}${post.url.replace(/^\//, '')}`,
+      id: url,
+      link: url,
       description: post.description,
       content: post.description,
       author: post.authors.map(toFeedAuthor),

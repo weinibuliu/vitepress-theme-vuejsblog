@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vitepress'
+import { useRoute, withBase } from 'vitepress'
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
 import { requestedLocation } from '../lib/url.js'
@@ -52,7 +52,9 @@ const requested = computed(() => requestedLocation(route))
       </p>
 
       <p class="vp-blog-content-not-found-action">
-        <a class="vp-blog-link" href="/">{{ strings.backToBlog }}</a>
+        <a class="vp-blog-link" :href="withBase('/')">{{
+          strings.backToBlog
+        }}</a>
       </p>
     </slot>
   </div>

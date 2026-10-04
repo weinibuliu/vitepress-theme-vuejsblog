@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue'
-import { useData } from 'vitepress'
+import { useData, withBase } from 'vitepress'
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { CHILD_SLOTS, filledSlots } from '../lib/slots.js'
 import Home from '../components/Home.vue'
@@ -29,7 +29,7 @@ import NotFound from '../components/NotFound.vue'
  * child is that a modifier here states the condition — `page.isNotFound`, the same one the
  * template dispatches on — once instead of twice.
  */
-const { page, frontmatter, site } = useData()
+const { page, frontmatter } = useData()
 const blog = useBlogConfig()
 const slots = useSlots()
 
@@ -75,11 +75,15 @@ const hasFooter = computed(
 
     <div class="vp-blog-layout-inner">
       <nav class="vp-blog-layout-nav" :aria-label="title">
-        <a class="vp-blog-layout-brand" href="/" :aria-label="title">
+        <a
+          class="vp-blog-layout-brand"
+          :href="withBase('/')"
+          :aria-label="title"
+        >
           <img
             v-if="logo"
             class="vp-blog-layout-logo"
-            :src="`${site.base}/${logo}`"
+            :src="withBase(logo)"
             :alt="title"
           />
           <!-- The label is the brand's only content when there is no logo, so it cannot
@@ -104,7 +108,7 @@ const hasFooter = computed(
             </span>
             <a
               class="vp-blog-layout-nav-link"
-              :href="item.link"
+              :href="withBase(item.link)"
               :target="
                 (item.external ?? isExternal(item.link)) ? '_blank' : undefined
               "
@@ -174,7 +178,7 @@ const hasFooter = computed(
             v-for="(item, index) of blog.footer.links"
             :key="index"
             class="vp-blog-layout-footer-link"
-            :href="item.link"
+            :href="withBase(item.link)"
             :target="
               (item.external ?? isExternal(item.link)) ? '_blank' : undefined
             "

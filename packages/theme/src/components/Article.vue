@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useData } from 'vitepress'
+import { useData, withBase } from 'vitepress'
 import { data as posts } from '../../posts.data.js'
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
@@ -88,16 +88,22 @@ const updated = computed(() => {
           <h2 class="vp-blog-content-post-nav-title">
             {{ strings.nextArticle }}
           </h2>
-          <a class="vp-blog-link" :href="nextPost.url">{{ nextPost.title }}</a>
+          <a class="vp-blog-link" :href="withBase(nextPost.url)">{{
+            nextPost.title
+          }}</a>
         </div>
         <div v-if="prevPost" class="vp-blog-content-post-nav-block">
           <h2 class="vp-blog-content-post-nav-title">
             {{ strings.previousArticle }}
           </h2>
-          <a class="vp-blog-link" :href="prevPost.url">{{ prevPost.title }}</a>
+          <a class="vp-blog-link" :href="withBase(prevPost.url)">{{
+            prevPost.title
+          }}</a>
         </div>
         <div class="vp-blog-content-post-nav-block">
-          <a class="vp-blog-link" href="/">{{ strings.backToBlog }}</a>
+          <a class="vp-blog-link" :href="withBase('/')">{{
+            strings.backToBlog
+          }}</a>
         </div>
       </footer>
 

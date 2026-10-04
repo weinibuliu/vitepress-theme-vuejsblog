@@ -180,7 +180,9 @@ export default defineConfig<ThemeConfig>({
       footer: {
         // HTML, not Markdown: an inline link must survive as a link.
         text: 'A footer <a href="https://example.com/">link</a>',
-        links: [{ text: 'RSS', link: '/feed.rss' }]
+        // "external" keeps the Feed out of VitePress's client router: an internal /feed.rss
+        // is read as a page route and answered with the 404 page.
+        links: [{ text: 'RSS', link: '/feed.rss', external: true }]
       },
       // HTML, and a link is the point: it must survive as a link rather than being shown
       // as literal markup. The description fallback beside it stays escaped. No backticks in
@@ -314,6 +316,14 @@ Hello from outside the workspace.
       home.includes('vp-blog-layout-footer-links') &&
         home.includes('vp-blog-layout-footer-link') &&
         home.includes('>RSS<')
+    ],
+    [
+      // The footer half of the rule the nav checks in verify-build: a Feed link outside the
+      // client router is the only kind that reaches the Feed.
+      'a footer Feed link carries a target, so the router lets the browser fetch it',
+      /<a[^>]*class="[^"]*vp-blog-layout-footer-link[^"]*"[^>]*target="_blank"/.test(
+        home
+      )
     ],
     [
       'a footer slot renders, and lands after the Site’s links',

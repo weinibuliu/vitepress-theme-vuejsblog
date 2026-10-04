@@ -392,6 +392,11 @@ export interface NavItem {
 
   /**
    * Open in a new tab. Defaults to `true` for absolute URLs.
+   *
+   * State it for a file the Site ships as well — the Feed above all. VitePress's client router
+   * handles every same-origin link itself unless its anchor carries `target`, and it only knows
+   * a URL is a file rather than a page from a list of extensions that does not include `.rss`.
+   * Left internal, a link to `feed.rss` is rendered as a route, and the reader gets the 404 page.
    */
   external?: boolean
 }
@@ -406,6 +411,8 @@ export interface FooterLink {
   link: string
   /**
    * Open in a new tab. Defaults to `true` for absolute URLs.
+   *
+   * The Feed needs it for the same reason it does in the nav — see `NavItem.external`.
    */
   external?: boolean
 }
@@ -491,8 +498,15 @@ export interface BlogThemeConfig {
   siteSubText?: string
 
   /**
-   * The Blog's absolute origin, e.g. `https://example.com`. Required to generate a
-   * Feed; when omitted the Theme warns and skips Feed generation.
+   * The Blog's origin — scheme, host and port alone, e.g. `https://example.com`, with no path.
+   *
+   * The Feed is the only thing that reads it. RSS is parsed away from the Site, so its links
+   * have to be absolute rather than relative to a document, and the origin is what makes them
+   * so. Where the Site is mounted is a separate fact and is stated once, by VitePress's `base`;
+   * the Theme appends it. Writing the path here as well duplicates it, which the Theme warns
+   * about and drops.
+   *
+   * Required to generate a Feed; when omitted the Theme warns and skips Feed generation.
    */
   baseUrl?: string
 

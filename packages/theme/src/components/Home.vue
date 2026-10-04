@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useData } from 'vitepress'
+import { useData, withBase } from 'vitepress'
 import { data as posts } from '../../posts.data.js'
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
@@ -58,7 +58,7 @@ const heroAvatar = computed(() => resolveHeroAvatar(hero.value, blog.author))
         <img
           v-if="heroAvatar"
           class="vp-blog-content-index-hero-avatar"
-          :src="heroAvatar"
+          :src="withBase(heroAvatar)"
           alt=""
           width="80"
           height="80"
@@ -107,7 +107,7 @@ const heroAvatar = computed(() => resolveHeroAvatar(hero.value, blog.author))
                   <BlogPin />
                 </slot>
               </span>
-              <a class="vp-blog-content-list-link" :href="post.url">{{
+              <a class="vp-blog-content-list-link" :href="withBase(post.url)">{{
                 post.title
               }}</a>
             </h2>
@@ -117,7 +117,11 @@ const heroAvatar = computed(() => resolveHeroAvatar(hero.value, blog.author))
               v-html="post.description"
             />
             <p class="vp-blog-content-read-more">
-              <a class="vp-blog-link" :href="post.url" :aria-label="post.title">
+              <a
+                class="vp-blog-link"
+                :href="withBase(post.url)"
+                :aria-label="post.title"
+              >
                 {{ strings.readMore }}
               </a>
             </p>

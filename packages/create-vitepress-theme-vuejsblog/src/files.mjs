@@ -226,13 +226,17 @@ function configFile(answers, year) {
   )
 
   const nav = [{ text: 'About', link: '/about' }]
-  if (answers.baseUrl) nav.push({ text: 'RSS Feed', link: '/feed.rss' })
+  // `external` takes the Feed out of VitePress's client router, which would otherwise read
+  // `/feed.rss` as a page route and answer with the 404 page instead of the Feed itself.
+  if (answers.baseUrl) {
+    nav.push({ text: 'RSS Feed', link: '/feed.rss', external: true })
+  }
 
   const footer = {
     text: `© ${year} ${escapeHtml(answers.author || answers.title)}`
   }
   if (answers.baseUrl) {
-    footer.links = [{ text: 'RSS Feed', link: '/feed.rss' }]
+    footer.links = [{ text: 'RSS Feed', link: '/feed.rss', external: true }]
   }
 
   return template('.vitepress/config.ts', [

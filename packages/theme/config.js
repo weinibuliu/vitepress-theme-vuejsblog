@@ -156,5 +156,7 @@ export function blogHead(ctx) {
   // The decision itself lives in `src/lib/favicon.ts`, which a unit test can reach without a
   // build. `pnpm check` runs the tests before the build, so anything tested through this file
   // would be reading a stale `dist`.
-  return faviconHead(ctx.siteConfig.head, favicon)
+  // The base comes from VitePress rather than from Theme Config: where the Site is mounted is
+  // VitePress's to say, and the icon is one of the resources that follows from it.
+  return faviconHead(ctx.siteConfig.head, favicon, ctx.siteConfig.site.base)
 }

@@ -22,4 +22,18 @@ describe('faviconHead', () => {
     const head = [['link', { rel: 'stylesheet', href: '/x.css' }]] as const
     expect(faviconHead([...head], '/favicon.ico')).toHaveLength(1)
   })
+
+  it('places the icon under the Site base', () => {
+    // A project-page deployment is mounted at `/blog/`, so its icon is served from
+    // `/blog/favicon.ico` rather than from the domain root.
+    expect(faviconHead(undefined, '/favicon.ico', '/blog/')).toEqual([
+      ['link', { rel: 'icon', href: '/blog/favicon.ico' }]
+    ])
+  })
+
+  it('leaves an icon on another origin alone', () => {
+    expect(
+      faviconHead(undefined, 'https://cdn.example/icon.svg', '/blog/')
+    ).toEqual([['link', { rel: 'icon', href: 'https://cdn.example/icon.svg' }]])
+  })
 })
