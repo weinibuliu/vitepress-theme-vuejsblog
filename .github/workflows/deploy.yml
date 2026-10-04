@@ -20,10 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6.1.0
 
-      - uses: actions/checkout@6.1.0
-        repository: vuejs/blog
-        path: 'vuejsblog'
-        sparse-checkout: posts
+      - uses: actions/checkout@v6.1.0
+        with:
+          repository: vuejs/blog
+          path: 'vuejsblog'
+          sparse-checkout: posts
 
       # clone https://github.com/vuejs/blog
       - run: |
@@ -32,7 +33,6 @@ jobs:
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 12
           cache: true
 
       - uses: actions/setup-node@v6.5.0
