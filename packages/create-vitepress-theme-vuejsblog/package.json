@@ -24,7 +24,8 @@
   "files": [
     "index.mjs",
     "src",
-    "templates"
+    "templates",
+    "LICENSE"
   ],
   "type": "module",
   "exports": {

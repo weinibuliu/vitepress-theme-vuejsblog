@@ -9,12 +9,13 @@
     "vitepress-theme",
     "vue"
   ],
-  "homepage": "https://github.com/CHANGE_ME/vitepress-theme-vuejsblog#readme",
-  "bugs": "https://github.com/CHANGE_ME/vitepress-theme-vuejsblog/issues",
+  "homepage": "https://github.com/weinibuliu/vitepress-theme-vuejsblog#readme",
+  "bugs": "https://github.com/weinibuliu/vitepress-theme-vuejsblog/issues",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CHANGE_ME/vitepress-theme-vuejsblog.git"
+    "url": "git+https://github.com/weinibuliu/vitepress-theme-vuejsblog.git",
+    "directory": "packages/theme"
   },
   "files": [
     "dist",
@@ -22,7 +23,8 @@
     "presets",
     "config.js",
     "config.d.ts",
-    "posts.data.ts"
+    "posts.data.ts",
+    "LICENSE"
   ],
   "type": "module",
   "exports": {

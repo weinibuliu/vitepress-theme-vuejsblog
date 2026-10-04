@@ -22,9 +22,17 @@ jobs:
 
 %s
 
-      - run: %s
+      - name: Install Dependence
+        run: %s
 
-      - run: %s
+      - name: Build Dist
+        run: %s
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6.0.0
+        with:
+          enablement: true
+
 
       - uses: actions/upload-pages-artifact@v5.0.0
         with:

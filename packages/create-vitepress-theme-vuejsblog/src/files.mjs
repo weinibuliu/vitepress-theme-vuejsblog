@@ -289,15 +289,18 @@ function deployWorkflow(packageManager) {
     // `pnpm/action-setup` refuses to run without a version, and reading the caller's
     // own is more likely to match the lockfile they are about to commit than a
     // literal chosen here would be.
-    setup.push('      - uses: pnpm/action-setup@v6')
+    setup.push('      - name: Setup pnpm')
+    setup.push('        uses: pnpm/action-setup@v6.1.0')
     setup.push('        with:')
     setup.push(`          cache: true`)
   } else if (packageManager === 'bun') {
-    setup.push('      - uses: oven-sh/setup-bun@v2.2.0')
+    setup.push('      - name: Setup bun')
+    setup.push('        uses: oven-sh/setup-bun@v2.2.0')
   }
 
   if (packageManager !== 'bun') {
-    setup.push('      - uses: actions/setup-node@v6.5.0')
+    setup.push('      - name: Setup Node')
+    setup.push('        uses: actions/setup-node@v6.5.0')
     setup.push('        with:')
     setup.push('          node-version: 22')
   }

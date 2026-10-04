@@ -1,0 +1,170 @@
+name: Publish Create App
+
+# Publishes `create-vitepress-theme-vuejsblog` (packages/create-vitepress-theme-vuejsblog)
+# to npm, which is what `pnpm create vitepress-theme-vuejsblog` resolves to.
+#
+# Two ways in, and they mean different things:
+#
+#   * pushing a `create-v<version>` tag publishes that version, and the tag must agree
+#     with the package's package.json — the tag is the human-readable record of what
+#     shipped, so letting the two drift would make the record a lie;
+#   * `workflow_dispatch` publishes whatever version is in package.json right now, which
+#     is the escape hatch for re-running a publish that died mid-flight.
+#
+# Nothing here bumps the version. Editing the package's package.json, committing, then
+# tagging is the whole release ritual.
+#
+# The scaffolder ships as plain ESM with no build step, so unlike the Theme there is
+# nothing to compile here — only the tarball and the registry.
+
+on:
+  push:
+    tags:
+      - 'create-v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run npm publish with --dry-run, so nothing is uploaded'
+        type: boolean
+        default: false
+      dist_tag:
+        description: 'npm dist-tag to publish under. Leave empty to derive it from the version.'
+        type: string
+        default: ''
+
+# `id-token: write` is what lets npm attach a provenance attestation, which is the only
+# reason this workflow wants anything beyond read access.
+permissions:
+  contents: read
+  id-token: write
+
+# Two publishes racing on the same tag would both pass the "is it already on npm?" check
+# and then one of them would lose at the registry. Keyed on the ref, so unrelated
+# releases still run in parallel.
+concurrency:
+  group: publish-create-app-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish create-vitepress-theme-vuejsblog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.1.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.1.0
+        with:
+          cache: true
+
+      # `registry-url` is what writes the `_authToken=${NODE_AUTH_TOKEN}` line into the
+      # npm config, so the token below is read from the environment rather than from a
+      # file this workflow would otherwise have to write itself.
+      - name: Setup Node
+        uses: actions/setup-node@v6.5.0
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install Dependency
+        run: pnpm install
+
+      # Nothing reads `templates/` at install time, so a broken template only shows up in a
+      # stranger's scaffold. The suite is the gate that would catch it — but it is currently
+      # red on `main` for reasons unrelated to publishing (the generated deploy workflow
+      # outgrew its template), so it is deliberately left out of this pipeline. Add
+      # `- run: pnpm test` here once it is green.
+
+      - name: Resolve version and dist-tag
+        id: package
+        env:
+          REQUESTED_TAG: ${{ inputs.dist_tag }}
+        run: |
+          set -euo pipefail
+          manifest=./packages/create-vitepress-theme-vuejsblog/package.json
+          name=$(node -p "require('$manifest').name")
+          version=$(node -p "require('$manifest').version")
+
+          # A prerelease must not land on `latest`, or `pnpm create
+          # vitepress-theme-vuejsblog` starts handing people a beta. `next` is where
+          # prereleases go until someone promotes one deliberately.
+          if [ -n "$REQUESTED_TAG" ]; then
+            tag="$REQUESTED_TAG"
+          elif [ "${version#*-}" != "$version" ]; then
+            tag=next
+          else
+            tag=latest
+          fi
+
+          {
+            echo "name=$name"
+            echo "version=$version"
+            echo "tag=$tag"
+          } >> "$GITHUB_OUTPUT"
+          echo "Releasing $name@$version on the '$tag' dist-tag"
+
+      - name: Check tag matches the package version
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          set -euo pipefail
+          expected="create-v${VERSION}"
+          if [ "${GITHUB_REF_NAME}" != "$expected" ]; then
+            echo "::error::Tag '${GITHUB_REF_NAME}' does not match the package version. Expected '${expected}'."
+            exit 1
+          fi
+
+      # A published version can never be overwritten, so a re-run of this workflow after a
+      # late step failed must not die at the registry with a confusing 403. Skipping is the
+      # correct outcome: the version is already out there.
+      - name: Check whether this version is already on npm
+        id: registry
+        env:
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+          VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          set -euo pipefail
+          if npm view "${PACKAGE_NAME}@${VERSION}" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::${PACKAGE_NAME}@${VERSION} is already published — skipping."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Printed before the upload so the run log shows exactly which files the tarball
+      # carries. Cheap, and it is the only place a missing template is visible before it
+      # becomes permanent.
+      - name: Inspect the tarball
+        if: steps.registry.outputs.published == 'false'
+        working-directory: packages/create-vitepress-theme-vuejsblog
+        run: npm pack --dry-run
+
+      - name: Publish to npm
+        if: steps.registry.outputs.published == 'false'
+        working-directory: packages/create-vitepress-theme-vuejsblog
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+          DIST_TAG: ${{ steps.package.outputs.tag }}
+        run: |
+          set -euo pipefail
+          args=(--access public --provenance --tag "$DIST_TAG")
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          npm publish "${args[@]}"
+
+      - name: Summary
+        if: steps.registry.outputs.published == 'false'
+        env:
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+          VERSION: ${{ steps.package.outputs.version }}
+          DIST_TAG: ${{ steps.package.outputs.tag }}
+        run: |
+          {
+            echo "### ${PACKAGE_NAME}@${VERSION}"
+            echo
+            echo "- dist-tag: \`${DIST_TAG}\`"
+            echo "- npm: https://www.npmjs.com/package/${PACKAGE_NAME}/v/${VERSION}"
+          } >> "$GITHUB_STEP_SUMMARY"

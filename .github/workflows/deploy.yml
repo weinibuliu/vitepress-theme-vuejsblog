@@ -32,7 +32,7 @@ jobs:
           cp -r vuejsblog/posts/. playground/docs/posts/
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.1.0
         with:
           cache: true
 
