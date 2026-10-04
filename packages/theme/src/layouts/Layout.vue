@@ -2,7 +2,6 @@
 import { computed, useSlots } from 'vue'
 import { useData } from 'vitepress'
 import { useBlogConfig } from '../lib/useBlogConfig.js'
-import { useLang } from '../lib/i18n.js'
 import { CHILD_SLOTS, filledSlots } from '../lib/slots.js'
 import Home from '../components/Home.vue'
 import Article from '../components/Article.vue'
@@ -30,9 +29,8 @@ import NotFound from '../components/NotFound.vue'
  * child is that a modifier here states the condition — `page.isNotFound`, the same one the
  * template dispatches on — once instead of twice.
  */
-const { page, frontmatter } = useData()
+const { page, frontmatter, site } = useData()
 const blog = useBlogConfig()
-const strings = computed(() => useLang(blog.value.lang))
 const slots = useSlots()
 
 const isHome = computed(() => frontmatter.value.layout === 'home')
@@ -81,7 +79,7 @@ const hasFooter = computed(
           <img
             v-if="logo"
             class="vp-blog-layout-logo"
-            :src="logo"
+            :src="`${site.base}/${logo}`"
             :alt="title"
           />
           <!-- The label is the brand's only content when there is no logo, so it cannot
