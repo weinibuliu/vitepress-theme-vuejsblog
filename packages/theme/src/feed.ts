@@ -94,9 +94,27 @@ export async function genFeed(
 
   writeFileSync(
     outPath,
-    withDublinCoreCreators(rendered.feed.rss2(), rendered.posts)
+    withUtf8ByteOrderMark(
+      withDublinCoreCreators(rendered.feed.rss2(), rendered.posts)
+    )
   )
   config.logger.info(`[blog] generated ${feedOptions.path}`)
+}
+
+/**
+ * The UTF-8 byte order mark, prepended for whoever reads the Feed as anything but XML.
+ *
+ * A browser will not render `application/rss+xml` with its XML view: Chrome shows the
+ * Feed as plain text. Neither `vitepress preview` nor most static hosts put a `charset`
+ * on that Content-Type, and plain-text decoding never reads the XML declaration, so the
+ * browser falls back to its locale's default encoding and a Blog written in any language
+ * other than the browser's comes out as mojibake. The byte order mark is the one encoding
+ * signal that every consumer honours — read before the Content-Type, read before the
+ * declaration — and XML 1.0 §4.3.3 permits one, so both kinds of reader decode the Feed
+ * as UTF-8.
+ */
+function withUtf8ByteOrderMark(rss: string): string {
+  return `\uFEFF${rss}`
 }
 
 /**

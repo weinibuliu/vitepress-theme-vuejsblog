@@ -184,6 +184,16 @@ check(
 
 section('Feed')
 check('a Feed was generated', feed.length > 0)
+// Browsers refuse to render `application/rss+xml` as XML — Chrome shows the Feed as plain
+// text — and neither `vitepress preview` nor most static hosts add a `charset` to that
+// Content-Type. Plain-text decoding never reads the XML declaration, so without a byte
+// order mark the browser falls back to its locale's encoding and the Blog comes out as
+// mojibake. The mark is read here as text because that is how the check below sees it.
+check(
+  'the Feed begins with a UTF-8 byte order mark',
+  feed.startsWith('\uFEFF'),
+  JSON.stringify(feed.slice(0, 20))
+)
 // The Feed's URLs are absolute, so the comparison is made against the same Site-relative form
 // the fixtures are written in. The prefix those URLs carry is asserted just below.
 const feedRelative = feed.split(`${ORIGIN}${BASE}`).join('/')
