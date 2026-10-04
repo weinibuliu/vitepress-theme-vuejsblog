@@ -1,0 +1,32 @@
+{
+  "name": "vitepress-theme-vuejsblog-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter vitepress-theme-vuejsblog build && pnpm --filter playground build",
+    "dev": "pnpm --filter playground dev",
+    "preview": "pnpm --filter playground preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "pnpm --filter vitepress-theme-vuejsblog typecheck",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check .",
+    "lint": "oxlint --vue-plugin .",
+    "create": "node packages/create-vitepress-theme-vuejsblog/index.mjs",
+    "verify": "node scripts/verify-build.mjs",
+    "verify:package": "node scripts/verify-package.mjs",
+    "verify:create": "node scripts/verify-create.mjs",
+    "check": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm verify && pnpm verify:package && pnpm verify:create"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "typescript": "5.6.3",
+    "vitepress": "2.0.0-alpha.20",
+    "vitest": "2.1.8",
+    "vue": "3.5.41"
+  },
+  "packageManager": "pnpm@12.8.1"
+}

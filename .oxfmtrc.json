@@ -1,0 +1,15 @@
+{
+  "$schema": "https://oxc.rs/schemas/oxfmtrc.json",
+  "semi": false,
+  "singleQuote": true,
+  "printWidth": 80,
+  "trailingComma": "none",
+  "ignorePatterns": [
+    "blog/**",
+    "vitepress/**",
+    "playground/posts/**",
+    "playground/.vitepress/dist/**",
+    "**/dist/**",
+    "pnpm-lock.yaml"
+  ]
+}

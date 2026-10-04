@@ -1,0 +1,16 @@
+{
+  "$schema": "https://oxc.rs/schemas/oxlintrc.json",
+  "plugins": ["typescript", "unicorn", "oxc", "vue"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "ignorePatterns": [
+    "blog/**",
+    "vitepress/**",
+    "playground/posts/**",
+    "**/dist/**",
+    "**/.vitepress/cache/**",
+    "**/node_modules/**"
+  ]
+}

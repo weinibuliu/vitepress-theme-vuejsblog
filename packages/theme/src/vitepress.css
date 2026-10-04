@@ -1,0 +1,41 @@
+/**
+ * VitePress's own design tokens, icon definitions and document typography,
+ * re-exported for the Theme.
+ *
+ * VitePress gives a custom theme **no styling at all**. `@theme/index` resolves to either
+ * the Site's `.vitepress/theme/` or to `theme-default`, never both
+ * (`src/client/app/index.ts`, `src/node/config.ts`), and every stylesheet below is
+ * imported by the default theme's own entry point. Nothing injects them globally — even
+ * `base.css`, which is the closest thing to a global reset, is only reachable through
+ * that entry point.
+ *
+ * So without these imports, a custom theme has no palette at all: every `--vp-c-*`
+ * reference resolves to nothing, Post bodies render unstyled, and the code block's copy
+ * button gets an empty mask because `vp-doc.css` only *references* `--vp-icon-copy` —
+ * `icons.css` is what defines it.
+ *
+ * These are VitePress's published stylesheets, so this reuses the real palette and the
+ * real typography instead of copying ~700 lines into this repo and letting them drift.
+ * They are imported here rather than through the `vitepress/theme` entry point because
+ * that entry also pulls in the default theme's Vue components, which a standalone blog
+ * theme would only ship and never use.
+ *
+ * What VitePress *does* provide regardless of theme is the app shell, not the styling:
+ * `<Content />`, `useData()`, the router, head management, and the `useCopyCode()` /
+ * `useCodeGroups()` behaviour that wires the code block's copy button up. That is why the
+ * button exists and works here, but has no icon until `icons.css` is imported.
+ *
+ * `vp-doc.css` expects the element carrying `vp-doc` to sit inside the default theme's
+ * `.Layout`, and a few of its variables (`--vp-layout-top-height`,
+ * `--vp-extra-scroll-margin`) are declared there rather than in `vars.css`. In this
+ * Theme they fall back to the values baked into their `var(..., default)` uses, so what
+ * is lost is the scroll offset that compensates for a fixed navbar — this Theme serves
+ * an inline navbar instead.
+ */
+
+@import 'vitepress/dist/client/theme-default/styles/vars.css';
+@import 'vitepress/dist/client/theme-default/styles/base.css';
+@import 'vitepress/dist/client/theme-default/styles/icons.css';
+@import 'vitepress/dist/client/theme-default/styles/components/vp-doc.css';
+@import 'vitepress/dist/client/theme-default/styles/components/vp-code.css';
+@import 'vitepress/dist/client/theme-default/styles/components/custom-block.css';

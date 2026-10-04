@@ -1,0 +1,1237 @@
+/**
+ * The Theme's Style Layer.
+ *
+ * Hand-written and self-contained: it depends on no CSS framework, and it reaches for
+ * VitePress's own `--vp-c-*` custom properties so that it follows appearance changes for
+ * free. See `docs/adr/0001-hand-written-css-over-tailwind.md` for why Tailwind is not
+ * used here.
+ *
+ * Markdown typography and code highlighting are NOT re-implemented here: `vitepress.css`
+ * pulls in VitePress's `vp-doc` and `vp-code` stylesheets, and `<Content />` renders
+ * inside an element carrying `vp-doc`. VitePress does not inject those globally — a
+ * custom theme gets no styling at all. This file only styles the parts that are the
+ * Theme's own: the shell, the nav, the post list, the byline and the article frame.
+ */
+
+/* ------------------------------------------------------------------ tokens */
+
+/**
+ * The Theme's public CSS interface.
+ *
+ * Eight variables, in three groups. Two rules keep it this small:
+ *
+ * 1. **Colours belong to VitePress.** Anything that is just a pointer at a `--vp-c-*`
+ *    token is not re-exported — a Site overrides `--vp-c-divider`, `--vp-c-text-1`,
+ *    `--vp-c-text-2` and `--vp-c-bg` directly. So only *layout* is declared here, and it
+ *    holds no colour at all.
+ * 2. **Only what needs its own lever gets one.** Body text and UI text need no separate
+ *    control. Links do: a Post's body and the Site's chrome resolve to the same VitePress
+ *    token, so without these two groups they cannot be told apart. Dividers do too, for the
+ *    same reason once the reference site's Post-body rule is taken into account.
+ *
+ *   --vp-blog-layout-measure         48rem
+ *   --vp-blog-layout-measure-wide    64rem
+ *   --vp-blog-layout-gutter          1rem
+ *
+ *   --vp-blog-link                UI chrome: nav, "Read more →", back, byline, footer,
+ *                                 hero subtext, the TOC's current entry
+ *   --vp-blog-link-hover
+ *
+ *   --vp-blog-content-link           A Post's body, and the excerpts on the index
+ *   --vp-blog-content-link-hover
+ *   --vp-blog-content-divider        The `---` rules inside a Post's body
+ *
+ * These five are deliberately **read, never declared** — see the note on the link rules
+ * below for why that is what makes them overridable.
+ *
+ * `--vp-blog-content-divider` is the one of the five whose default is not a `--vp-c-*`
+ * token, because the reference site's Post-body rule is not one: Tailwind Typography's
+ * `.prose hr` paints a fixed `#e5e7eb` and does not follow the chrome's divider at all. The
+ * note on the divider rule below is where that value comes from.
+ */
+:root {
+  --vp-blog-layout-measure: 48rem;
+  --vp-blog-layout-measure-wide: 64rem;
+  --vp-blog-layout-gutter: 1rem;
+}
+
+/**
+ * A Post's body is its own context, so its links get their own lever, separate from
+ * `--vp-blog-link`.
+ *
+ * VitePress's `.vp-doc a` hard-codes `--vp-c-brand-1`, which is also what the Theme's UI
+ * links resolve to, so without this the two could be neither told apart nor tuned
+ * separately. That matters as soon as a Site tints its background: a link colour chosen
+ * against a white page is not automatically readable against a tinted one, and body links
+ * also land on the inline-code background, which is a third surface again.
+ *
+ * The defaults are unchanged — the `var()` fallback keeps VitePress's green — so this adds
+ * the lever without altering how the Theme looks.
+ *
+ * Both `.vp-doc` and `.vp-blog-prose` are matched because the two ways a Post body reaches
+ * the page carry different classes: `<Content />` adds `vp-doc` itself, while the index
+ * renders an excerpt from data and marks it up here.
+ *
+ * Reading the variables through a fallback, rather than declaring them, is what makes them
+ * overridable. A Site that sets `--vp-blog-content-link` before this stylesheet loads
+ * would lose to a declaration; with a fallback there is nothing to lose to.
+ */
+.vp-blog-prose a,
+.vp-doc a {
+  color: var(--vp-blog-content-link, var(--vp-c-brand-1));
+}
+
+.vp-blog-prose a:hover,
+.vp-doc a:hover {
+  color: var(--vp-blog-content-link-hover, var(--vp-c-brand-2));
+}
+
+/**
+ * The Theme's default accent is green.
+ *
+ * `--vp-c-brand-*` is the single lever: VitePress derives `--vp-c-tip-*`,
+ * `--vp-c-note-*`, `--vp-code-color`, `--vp-code-link-*` and the brand button colours
+ * from it, so this one block recolours links, the "Read more" on every Post, callouts
+ * and inline code.
+ *
+ * Rather than inventing a green, this points the brand tokens at VitePress's own green
+ * scale, which is already defined per mode in `vars.css` (light `#18794e`, dark
+ * `#3dd68c`) and already carries a contrast-checked pair. Overriding only in `:root` is
+ * deliberate: `var()` is resolved per element, so in dark mode these pick up `.dark`'s
+ * green values without a second block.
+ *
+ * To use a different colour, override these four tokens in your own stylesheet — or
+ * import one of the shipped presets — rather than editing this file.
+ */
+:root {
+  --vp-c-brand-1: var(--vp-c-green-1);
+  --vp-c-brand-2: var(--vp-c-green-2);
+  --vp-c-brand-3: var(--vp-c-green-3);
+  --vp-c-brand-soft: var(--vp-c-green-soft);
+  --vp-c-brand: var(--vp-c-brand-1);
+}
+
+/**
+ * The Theme's default background is the reference site's.
+ *
+ * Light needs nothing here: VitePress's `#ffffff` is already what the reference shows. That
+ * site declares no background at all, so its page is the white the browser gives it. Dark
+ * does differ, which is the whole reason this block exists — the reference paints its root
+ * element Tailwind's `slate-900`, `#0f172a`, where VitePress's own dark background is the
+ * neutral `#1b1b1f`. Matching the reference means adopting that value.
+ *
+ * This is the one place this stylesheet declares a colour rather than pointing at a
+ * VitePress token, and the second line is why it is not a one-liner. VitePress binds
+ * `--vp-code-block-bg` to `--vp-c-bg-alt` (`#161618`), a neutral picked to sit a step below
+ * `#1b1b1f`; against a navy it measures 1.01:1, no step at all, so code blocks would lose
+ * their surface. The reference's own answer is to darken the page colour by half, which
+ * lands at 1.10:1. Deriving it with `color-mix` rather than hard-coding the result means a
+ * Site that moves `--vp-c-bg` keeps a code-block surface to go with it.
+ *
+ * The other surfaces VitePress pairs with its dark background need no help: `--vp-c-bg-soft`
+ * and `--vp-c-bg-elv` (`#202127`) are 1.11:1 against the navy, and `--vp-c-gutter` is black.
+ */
+.dark {
+  --vp-c-bg: #0f172a;
+  --vp-c-bg-alt: color-mix(in srgb, var(--vp-c-bg) 50%, #000);
+}
+
+/* ------------------------------------------------------------------- shell */
+
+.vp-blog-layout-shell {
+  min-height: 100vh;
+  background-color: var(--vp-c-bg);
+  color: var(--vp-c-text-1);
+  -webkit-font-smoothing: antialiased;
+}
+
+.vp-blog-layout-inner,
+.vp-blog-layout-main {
+  width: 100%;
+  max-width: var(--vp-blog-layout-measure);
+  margin: 0 auto;
+  padding: 0 var(--vp-blog-layout-gutter);
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-layout-inner,
+  .vp-blog-layout-main {
+    max-width: var(--vp-blog-layout-measure-wide);
+    padding: 0;
+  }
+}
+
+/* --------------------------------------------------------------------- nav */
+
+.vp-blog-layout-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2.5rem 0;
+  font-weight: 700;
+}
+
+.vp-blog-layout-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.vp-blog-layout-logo {
+  display: inline-block;
+  width: 36px;
+  height: 31px;
+  vertical-align: middle;
+}
+
+.vp-blog-layout-brand-label {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .vp-blog-layout-brand-label {
+    display: inline;
+  }
+}
+
+/* With no logo the label is the brand's only content, so the hiding above — which exists so
+   it does not crowd a logo, and to avoid repeating the title on the index — has nothing to
+   protect. Without this the brand link is invisible but still clickable: on the index at any
+   width, and on every other page on a phone. */
+.vp-blog-layout-brand-label.is-solo {
+  display: inline;
+}
+
+.vp-blog-layout-nav-links {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--vp-c-text-2);
+}
+
+.vp-blog-layout-nav-separator {
+  margin: 0 0.5rem;
+  user-select: none;
+}
+
+.vp-blog-layout-nav-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.vp-blog-layout-nav-link:hover {
+  color: var(--vp-c-text-1);
+}
+
+/* -------------------------------------------------------------- home / list */
+
+.vp-blog-content-index-head {
+  padding: 1.5rem 0 2rem;
+}
+
+.vp-blog-content-index-title {
+  margin: 0;
+  font-size: 1.875rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--vp-c-text-1);
+}
+
+@media (min-width: 640px) {
+  .vp-blog-content-index-title {
+    font-size: 2.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .vp-blog-content-index-title {
+    font-size: 3.75rem;
+  }
+}
+
+.vp-blog-content-index-subtext {
+  margin: 0.5rem 0 0;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: var(--vp-c-text-2);
+}
+
+@media (min-width: 768px) {
+  .vp-blog-content-index-head > * + * {
+    margin-top: 1.25rem;
+  }
+}
+
+.vp-blog-content-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.vp-blog-content-list-item {
+  padding: 3rem 0;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.vp-blog-content-list-entry {
+  display: block;
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-content-list-entry {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    align-items: baseline;
+  }
+}
+
+.vp-blog-ui-date {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  color: var(--vp-c-text-2);
+}
+
+.vp-blog-content-list-main {
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-content-list-main {
+    grid-column: span 3 / span 3;
+    margin-top: 0;
+  }
+}
+
+.vp-blog-content-list-title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.vp-blog-content-list-link {
+  color: var(--vp-c-text-1);
+  text-decoration: none;
+}
+
+.vp-blog-content-list-link:hover {
+  color: var(--vp-blog-link, var(--vp-c-brand-1));
+}
+
+.vp-blog-content-list-excerpt {
+  margin-top: 1.5rem;
+}
+
+.vp-blog-content-read-more {
+  margin: 1.5rem 0 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+.vp-blog-link {
+  color: var(--vp-blog-link, var(--vp-c-brand-1));
+  text-decoration: none;
+}
+
+.vp-blog-link:hover {
+  color: var(--vp-blog-link-hover, var(--vp-c-brand-2));
+}
+
+.vp-blog-content-empty {
+  padding: 3rem 0;
+  color: var(--vp-c-text-2);
+}
+
+/* ------------------------------------------------------------------ article */
+
+.vp-blog-content-post-head {
+  padding: 1.5rem 0 0;
+  text-align: center;
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-content-post-head {
+    padding-bottom: 2.5rem;
+  }
+}
+
+.vp-blog-content-post-title {
+  margin: 0.25rem 0 0;
+  font-size: 1.875rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--vp-c-text-1);
+}
+
+@media (min-width: 640px) {
+  .vp-blog-content-post-title {
+    font-size: 2.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .vp-blog-content-post-title {
+    font-size: 3rem;
+  }
+}
+
+.vp-blog-content-post-head .vp-blog-ui-date {
+  text-align: center;
+}
+
+.vp-blog-content-updated {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--vp-c-text-2);
+}
+
+.vp-blog-content-post-frame {
+  padding-bottom: 4rem;
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-content-post-frame {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 2.5rem;
+    /* Three rows, one per thing the left column holds: the byline, the Next/Previous
+       links and the TOC. The Post's own body spans all three and is what makes the column
+       tall; the last row is therefore the one that takes up the slack, which is also where
+       the TOC needs the room — a sticky element can only travel inside its own area. */
+    grid-template-rows: auto auto 1fr;
+    padding-bottom: 5rem;
+  }
+}
+
+.vp-blog-content-post-main {
+  padding-top: 2.5rem;
+  padding-bottom: 2rem;
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-content-post-main {
+    grid-column: span 3 / span 3;
+    grid-row: span 3 / span 3;
+  }
+}
+
+/* -------------------------------------------------------------------- tabs */
+
+/**
+ * A Tab Group, as `lib/tabs.ts` renders one and `components/BlogTabs.vue` draws it.
+ *
+ * Flat, like everything else here: a row of titles on a soft surface, and the chosen pane below
+ * it, inside one divider-coloured box. The reference site has no Tabs to copy, so the shape is
+ * borrowed from the feature's own reference — `vuepress-theme-hope` — while the colour comes
+ * from VitePress's tokens, which is what makes it follow a Site's palette and dark mode for
+ * free. Its notched, folder-like tabs are deliberately not reproduced: that motif exists
+ * nowhere else in this Theme, and it costs two gradients per title to say "this one is chosen"
+ * where a surface and the brand colour already do.
+ */
+.vp-blog-tabs {
+  margin: 1.5rem 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  /* The row's soft surface would otherwise square off the box's top corners. */
+  overflow: hidden;
+}
+
+.vp-blog-tabs-nav {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+
+  padding: 0.375rem;
+
+  border-bottom: 1px solid var(--vp-c-divider);
+  background-color: var(--vp-c-bg-soft);
+}
+
+.vp-blog-tabs-tab {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  background-color: transparent;
+  color: var(--vp-c-text-2);
+
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    color 0.25s,
+    background-color 0.25s,
+    border-color 0.25s;
+}
+
+.vp-blog-tabs-tab:hover {
+  color: var(--vp-c-text-1);
+}
+
+/**
+ * The chosen title: the page's own surface lifted out of the row, and the Theme's accent on the
+ * word itself. Both are levers a Site already owns, so a retinted Site gets a retinted row.
+ */
+.vp-blog-tabs-tab.is-active {
+  border-color: var(--vp-c-divider);
+  background-color: var(--vp-c-bg);
+  color: var(--vp-c-brand-1);
+}
+
+/**
+ * One pane. Hidden by `display` rather than by the `hidden` attribute so that a page whose
+ * stylesheet never arrived — and every printed page — shows all of them.
+ */
+.vp-blog-tabs-panel {
+  display: none;
+  padding: 1rem 1.25rem;
+  background-color: var(--vp-c-bg);
+}
+
+.vp-blog-tabs-panel.is-active {
+  display: block;
+}
+
+.vp-blog-tabs-panel-body > :first-child {
+  margin-top: 0;
+}
+
+.vp-blog-tabs-panel-body > :last-child {
+  margin-bottom: 0;
+}
+
+/** The same title again, above its pane, for a page with no row to click. */
+.vp-blog-tabs-panel-title {
+  display: none;
+}
+
+/**
+ * No row to click: on paper, and in a browser that never ran the script that would make the row
+ * do anything. Every pane is shown, each under its own title, rather than leaving a reader with
+ * whichever one happened to be chosen — the panes are all in the HTML for exactly this reason,
+ * which is also why they are hidden by `display` here instead of by the `hidden` attribute.
+ */
+@media print, (scripting: none) {
+  .vp-blog-tabs-nav {
+    display: none;
+  }
+
+  .vp-blog-tabs-panel,
+  .vp-blog-tabs-panel-title {
+    display: block;
+  }
+
+  .vp-blog-tabs-panel-title {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--vp-c-divider);
+    font-weight: 600;
+  }
+}
+
+/* --------------------------------------------------------------- byline/nav */
+
+.vp-blog-ui-byline {
+  margin: 0;
+  padding: 1.5rem 0 2.5rem;
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-ui-byline {
+    grid-column-start: 1;
+    grid-row-start: 1;
+  }
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-ui-byline {
+    padding-top: 2.75rem;
+    border-bottom: 1px solid var(--vp-c-divider);
+  }
+}
+
+.vp-blog-ui-byline-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .vp-blog-ui-byline-list {
+    gap: 3rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-ui-byline-list {
+    display: block;
+  }
+
+  .vp-blog-ui-byline-entry + .vp-blog-ui-byline-entry {
+    margin-top: 2rem;
+  }
+}
+
+.vp-blog-ui-byline-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vp-blog-ui-byline-avatar-link {
+  display: inline-flex;
+}
+
+.vp-blog-ui-byline-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+
+.vp-blog-ui-byline-meta {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.vp-blog-ui-byline-name {
+  margin: 0;
+  color: var(--vp-c-text-1);
+}
+
+.vp-blog-ui-byline-meta dd {
+  margin: 0;
+}
+
+.vp-blog-ui-byline-body {
+  display: flex;
+  flex-direction: column;
+  /* Without this a long Social Link caption widens the byline instead of ellipsising:
+     a flex item will not shrink below its content unless it is allowed to. */
+  min-width: 0;
+}
+
+.vp-blog-ui-social {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.125rem 0 0;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  list-style: none;
+}
+
+.vp-blog-ui-social-item {
+  /* A flex item will not shrink below its content unless it is allowed to, and a sole
+     Social Link's caption is what has to be allowed to ellipsise. */
+  min-width: 0;
+}
+
+.vp-blog-ui-social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  color: var(--vp-c-text-2);
+  transition: color 0.25s;
+}
+
+.vp-blog-ui-social-link:hover {
+  color: var(--vp-c-text-1);
+}
+
+.vp-blog-ui-social-icon {
+  /* The mask-based marks are sized in `em` by VitePress's own icon rules; this matches
+     them and gives the inline envelope and a custom image the same box. */
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.vp-blog-ui-social-icon > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Only a sole Social Link gets text, and its caption may be a URL: truncate rather than
+   let it stretch the row. The full value stays in the DOM, so it is still copyable and
+   still the link's accessible name when the Site gave no label. */
+.vp-blog-ui-social-caption {
+  overflow: hidden;
+  max-width: 14rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vp-blog-content-post-nav {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-content-post-nav {
+    grid-column-start: 1;
+    grid-row-start: 2;
+  }
+}
+
+.vp-blog-content-post-nav-block {
+  padding: 2rem 0;
+}
+
+.vp-blog-content-post-nav-block + .vp-blog-content-post-nav-block {
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.vp-blog-content-post-nav-title {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-2);
+}
+
+.vp-blog-content-post-nav-block .vp-blog-link {
+  display: inline-block;
+  margin-top: 0.25rem;
+}
+
+/* -------------------------------------------------------------------- toc */
+
+/**
+ * A Post's TOC, in two renderings: a collapsed `<details>` below 1280px, and the list itself
+ * in the frame's left column from 1280px up. Both are always in the document —
+ * `components/BlogToc.vue` says why — so all that is left here is deciding which one each
+ * width shows, and how the column's copy behaves once it is sticky.
+ *
+ * The narrow rendering is what the file declares first, because it is the one that needs no
+ * layout: a bordered row that reads like the Next/Previous blocks above it and opens in place.
+ * From 1280px up the same markup is placed in the column, sticks, and hides the disclosure
+ * instead — and the column's copy is the one that has to scroll on its own.
+ */
+.vp-blog-ui-toc-nav {
+  display: none;
+}
+
+.vp-blog-ui-toc-disclosure {
+  border-top: 1px solid var(--vp-c-divider);
+  border-bottom: 1px solid var(--vp-c-divider);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.vp-blog-ui-toc-summary {
+  padding: 1rem 0;
+  font-weight: 500;
+  color: var(--vp-c-text-1);
+  cursor: pointer;
+}
+
+@media (min-width: 1280px) {
+  .vp-blog-ui-toc {
+    grid-column-start: 1;
+    grid-row-start: 3;
+    /* A sticky box travels only inside its own area, and a stretched grid item fills that
+       area, which would leave it nothing to travel through. The area is the tall `1fr` row
+       above and the TOC is its content's height. */
+    align-self: start;
+    position: sticky;
+    /* Nothing above it is fixed — the Theme's nav scrolls away with the page — so this is
+       breathing room rather than the height of a bar. */
+    top: 1.5rem;
+  }
+
+  .vp-blog-ui-toc-disclosure {
+    display: none;
+  }
+
+  .vp-blog-ui-toc-nav {
+    display: block;
+    /* A long Post's TOC can be taller than the window. Scrolling it on its own is what keeps
+       every heading reachable, where the alternatives both fail: `hidden` would cut the tail
+       off, and letting it grow would carry the tail past the bottom of the window with
+       nothing to scroll. */
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding-top: 2rem;
+    /* Continues the left column's dividers, which is what the Next/Previous blocks above
+       are separated by. */
+    border-top: 1px solid var(--vp-c-divider);
+  }
+}
+
+/**
+ * The label over the list, and the summary that reveals it below 1280px, are the same string:
+ * what the list is, said once.
+ */
+.vp-blog-ui-toc-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.vp-blog-ui-toc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/**
+ * The list's levels are separated by indentation alone.
+ *
+ * The reader is looking for one heading rather than reading the list, so a level does not get
+ * its own type size: an h3 under an h2 is the same text one step in, which is exactly how the
+ * Post nests them. The rule reads as "a list inside a list", so no depth reaches the template.
+ */
+.vp-blog-ui-toc-list .vp-blog-ui-toc-list {
+  padding-left: 0.875rem;
+}
+
+.vp-blog-ui-toc-link {
+  display: block;
+  padding: 0.25rem 0;
+  color: var(--vp-c-text-2);
+  text-decoration: none;
+  transition: color 0.25s;
+}
+
+.vp-blog-ui-toc-link:hover {
+  color: var(--vp-c-text-1);
+}
+
+/**
+ * Where the reader is, in the colour a Site already owns.
+ *
+ * Reading the link lever rather than naming a colour is the point: a Site that retints its
+ * links — or that adopts one of `presets/` — gets a TOC that follows, without learning a
+ * variable that exists only for this one line. It is also the one colour in the Theme that is
+ * guaranteed to be readable as text, because every preset is checked against both backgrounds
+ * as text; the TOC sits on that same surface.
+ *
+ * Hover stays `--vp-c-text-1` above instead, so that the two states cannot be confused:
+ * "reachable" and "you are here" have to look different, and a brand-coloured hover would make
+ * every line the pointer crosses look like the current one.
+ */
+.vp-blog-ui-toc-link.is-active {
+  color: var(--vp-blog-link, var(--vp-c-brand-1));
+}
+
+/* ------------------------------------------------------------------- footer */
+
+.vp-blog-layout-footer {
+  display: flex;
+  flex-wrap: wrap;
+  /* The prose sits at one end and the links at the other, which is the shape a footer
+     usually wants — and the reason `text` and `links` are separate roles rather than one
+     list of items sharing an even gap. */
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 2.5rem 0;
+  font-size: 0.875rem;
+  color: var(--vp-c-text-2);
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.vp-blog-layout-footer-text {
+  margin: 0;
+}
+
+/* `text` is HTML, so it can carry links of its own. Without this they would be the
+   browser's default blue, a colour this Theme uses nowhere else. */
+.vp-blog-layout-footer-text a {
+  color: var(--vp-blog-link, var(--vp-c-brand-1));
+  text-decoration-line: underline;
+  text-underline-offset: 0.125rem;
+  transition: color 0.25s;
+}
+
+.vp-blog-layout-footer-text a:hover {
+  color: var(--vp-blog-link-hover, var(--vp-c-brand-2));
+}
+
+.vp-blog-layout-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.vp-blog-layout-footer-link {
+  color: var(--vp-blog-link, var(--vp-c-brand-1));
+  text-decoration: none;
+}
+
+.vp-blog-layout-footer-link:hover {
+  color: var(--vp-blog-link-hover, var(--vp-c-brand-2));
+}
+
+/* --------------------------------------------------------------------- hero */
+
+/* The hero is the index's heading in another shape, so it lives under `content-index-`
+   rather than as a group of its own. */
+
+.vp-blog-content-index-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 0 2rem;
+}
+
+.vp-blog-content-index-hero-avatar {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+
+.vp-blog-content-index-hero-title {
+  margin: 1rem 0 0;
+  font-size: 2.25rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--vp-c-text-1);
+}
+
+@media (min-width: 768px) {
+  .vp-blog-content-index-hero-title {
+    font-size: 3rem;
+  }
+}
+
+.vp-blog-content-index-hero-subtext {
+  margin: 0.75rem auto 0;
+  max-width: 32rem;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: var(--vp-c-text-2);
+}
+
+/* `hero.subtext` is HTML, so it can carry links of its own — and `v-html` content brings no
+   styling with it, so without this they would be the browser's default blue, a colour this
+   Theme uses nowhere else. Same treatment as the footer's text, which is the other field a
+   Site hands us as HTML. */
+.vp-blog-content-index-hero-subtext a {
+  color: var(--vp-blog-link, var(--vp-c-brand-1));
+  text-decoration-line: underline;
+  text-underline-offset: 0.125rem;
+  transition: color 0.25s;
+}
+
+.vp-blog-content-index-hero-subtext a:hover {
+  color: var(--vp-blog-link-hover, var(--vp-c-brand-2));
+}
+
+/* ---------------------------------------------------------------------- 404 */
+
+/**
+ * The 404 is the one page the Theme renders with nothing to read, so it is the one page
+ * that is *centred* rather than laid out: the reader arrives by accident and the only useful
+ * thing on the page is the address they asked for and the way back.
+ *
+ * Centring against the viewport is not the same as centring against the page. The nav and
+ * the footer are as much a part of the shell as the 404 is, and a `100vh` offset would
+ * either collide with the footer or leave the page sitting above the middle on a Site whose
+ * footer grew a line. So nothing here guesses at their height. Instead Layout marks the
+ * shell `is-not-found` and these three rules make the shell a column in which `main` is the
+ * row that grows to fill exactly what the nav and the footer do not:
+ *
+ *   shell   flex column
+ *   inner   flex column, and the row that takes the shell's leftover height
+ *   main    flex column, taking the inner's leftover height, centring what is in it
+ *
+ * Without the chain `main` is only as tall as its content and `justify-content` has nothing
+ * to centre within. All three are scoped to the modifier so every other page keeps the
+ * plain block layout — the reason the class is a modifier rather than a default.
+ */
+.vp-blog-layout-shell.is-not-found {
+  display: flex;
+  flex-direction: column;
+}
+
+.vp-blog-layout-shell.is-not-found .vp-blog-layout-inner {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.vp-blog-layout-shell.is-not-found .vp-blog-layout-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/**
+ * The vertical padding is the floor, not the spacing: when the viewport has room to spare
+ * the centring above supplies it, and when it does not — a phone held sideways — this is
+ * what keeps the heading off the nav and the footer. It is smaller than the old `5rem` for
+ * that reason.
+ */
+.vp-blog-content-not-found {
+  padding: 3rem 0;
+  text-align: center;
+}
+
+/**
+ * The numeral is a watermark, not the heading. It repeats the "404" the heading already
+ * carries, which is only a problem if the eye reads them as two statements — so it is large,
+ * muted and set in `--vp-c-text-3`, where the heading is the opposite of all three.
+ */
+.vp-blog-content-not-found-code {
+  margin: 0;
+  font-size: 5rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--vp-c-text-3);
+}
+
+.vp-blog-content-not-found-title {
+  margin: 1rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+
+.vp-blog-content-not-found-text {
+  margin: 0.75rem auto 0;
+  max-width: 28rem;
+  font-size: 1rem;
+  line-height: 1.75rem;
+  color: var(--vp-c-text-2);
+}
+
+/**
+ * What the reader actually asked for.
+ *
+ * A chip rather than a line of text, because it is a value to compare against the address
+ * bar rather than something to read — and the thing that is wrong is often wrong in a way
+ * the eye catches only when it is set apart. `anywhere` is what stops a long path from
+ * widening the page; the chip wraps instead of scrolling because there is nothing else on
+ * the page for a scrollbar to be worth.
+ */
+.vp-blog-content-not-found-route {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  max-width: 100%;
+  margin: 1.5rem 0 0;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 0.5rem;
+  background-color: var(--vp-c-bg-soft);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--vp-c-text-2);
+}
+
+.vp-blog-content-not-found-route-label {
+  /* The label stays whole on a wrap, so the location is what moves to the next line. */
+  flex: none;
+}
+
+.vp-blog-content-not-found-route-path {
+  /* `code` is VitePress-typed only inside `vp-doc`; this one is the Theme's own, so nothing
+     gives it a monospace face or keeps a long token from overflowing. */
+  overflow-wrap: anywhere;
+  font-family: var(--vp-font-family-mono);
+  color: var(--vp-c-text-1);
+}
+
+.vp-blog-content-not-found-action {
+  margin: 1.5rem 0 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+/* ----------------------------------------------------------- pinned badge */
+
+/**
+ * The badge a pinned Post carries beside its title, on the index and on the Post itself.
+ *
+ * Sized in `em` rather than `rem` because it appears beside two different headings — the
+ * index title and the Post title are not the same size — and the badge should read as part
+ * of the title it belongs to. The colour is the UI link colour, since the badge is the
+ * Theme's chrome rather than the Post's content.
+ */
+.vp-blog-ui-pin {
+  display: inline-block;
+  margin-right: 0.4em;
+  color: var(--vp-blog-link, var(--vp-c-brand-1));
+  /* The glyph's ink sits in the top of its square box, so an unshifted baseline would leave
+     the pin floating above the title. This drops it until the point meets the baseline. */
+  vertical-align: -0.15em;
+}
+
+.vp-blog-ui-pin-glyph {
+  display: block;
+  width: 0.8em;
+  height: 0.8em;
+}
+
+/* -------------------------------------------------------------- utilities */
+
+/**
+ * Screen-reader-only content, matching what the reference site relied on Tailwind
+ * for. Needed because the Theme ships no utility framework.
+ */
+.vp-blog-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/**
+ * A `---` in a Post's Markdown is one divider, not two.
+ *
+ * The reference site renders a Post body with Tailwind Typography's `.prose`, whose `h2`
+ * declares no `border-top`. The `vp-doc.css` this Theme imports whole for the rest of its
+ * typography gives every `h2` one, so a Post that puts `## ` directly after `---` draws two
+ * rules about 48px apart — the `<hr>` and the heading's own border — where the reference
+ * draws one. `[[TOC]]` between the two merely hides it.
+ *
+ * Dropping the border makes `---` the only divider a Post body draws. The `hr` margins and
+ * the `hr + *` reset are Tailwind Typography's own (`3em` and `margin-top: 0`, at the
+ * reference's 16px body size), and the `hr + *` reset is why the `hr` has to carry the
+ * spacing itself: with the heading's top margin zeroed, a `hr` left at VitePress's `1rem`
+ * would set the heading only 16px below the rule, where the reference sets it 48px.
+ *
+ * The colour is the reference's too, and is the point of the variable. Its Post-body rule is
+ * a fixed `#e5e7eb` that does not follow its chrome: in dark mode the body's dividers stay
+ * bright while the chrome divides with `slate-200/5`, and that difference in weight is part
+ * of the look. `--vp-c-divider` cannot express both — the chrome uses it, and so do tables
+ * and blockquotes, which would go nearly invisible if it were thinned to the chrome's dark
+ * value. So a Post body reads its own variable and falls back to the reference's literal,
+ * read through a fallback rather than declared for the reason the link rules above give.
+ *
+ * Scoped to `.vp-blog-prose`, so a standalone `layout: page` document keeps VitePress's own
+ * typography — see the note in `components/BlogDoc.vue`. This is the one place the Theme
+ * does not inherit `vp-doc`'s Markdown typography as it stands;
+ * `docs/adr/0001-hand-written-css-over-tailwind.md` says why.
+ *
+ * The permalink has to lose the padding with the heading. `vp-doc.css` pairs
+ * `h2 { padding-top: 1.5rem }` with `h2 .header-anchor { top: 1.5rem }`: the `#` is
+ * absolutely positioned and cannot follow the text, so the two values have to agree, and
+ * the padding is what the anchor's `top` is measured against. Zeroing only the padding
+ * leaves the `#` drawn 1.5rem below its heading — the paragraph below pays the other half.
+ */
+.vp-blog-prose h2 {
+  border-top: none;
+  padding-top: 0;
+}
+
+/**
+ * The other half of the pair above.
+ *
+ * Equal specificity to `vp-doc.css`'s rule and later in the bundle, which is what lets it
+ * win — the same order the `padding-top: 0` override beside it already relies on. h1 and
+ * h3–h6 need no counterpart: only h2 carries VitePress's padding/anchor pair.
+ */
+.vp-blog-prose h2 .header-anchor {
+  top: 0;
+}
+
+.vp-blog-prose hr {
+  border-top: 1px solid var(--vp-blog-content-divider, #e5e7eb);
+  margin: 3rem 0;
+}
+
+.vp-blog-prose hr + * {
+  margin-top: 0;
+}
+
+/**
+ * The chrome's dividers take the other half of that pair in dark mode.
+ *
+ * The reference divides its chrome with `dark:divide-slate-200/5` — slate-200 at 5%, which
+ * against its navy is barely a line — while a Post body keeps the bright rule above.
+ * VitePress's `--vp-c-divider` (`#2e2e32`) sits between the two weights: too strong for the
+ * chrome on this background, too weak for a Post body.
+ *
+ * `--vp-c-divider` stays the lever, so a Site that retints it retints these too; the mix
+ * only thins it. The override is scoped to the chrome's own rules rather than to the token,
+ * because tables and blockquotes read the token and their borders have to stay legible.
+ * Light mode needs no help: there `--vp-c-divider` is already the reference's weight.
+ */
+.dark .vp-blog-content-list,
+.dark .vp-blog-content-list-item,
+.dark .vp-blog-ui-byline,
+.dark .vp-blog-content-post-nav-block + .vp-blog-content-post-nav-block,
+.dark .vp-blog-ui-toc-nav,
+.dark .vp-blog-ui-toc-disclosure,
+.dark .vp-blog-layout-footer {
+  border-color: color-mix(in srgb, var(--vp-c-divider) 45%, transparent);
+}
+
+/**
+ * Images inside post bodies: the reference site centred them and capped the width
+ * on small screens.
+ */
+.vp-blog-prose img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 518px) {
+  .vp-blog-prose img {
+    max-width: 100% !important;
+  }
+}
+
+/**
+ * Excerpts embed rendered Markdown, so their prose spacing needs reining in when
+ * they appear in the list rather than a full post body.
+ */
+.vp-blog-content-list-excerpt > :first-child {
+  margin-top: 0;
+}
+
+.vp-blog-content-list-excerpt > :last-child {
+  margin-bottom: 0;
+}
+
+/* ------------------------------------------------------- standalone document */
+
+.vp-blog-content-doc {
+  padding: 1.5rem 0 4rem;
+}

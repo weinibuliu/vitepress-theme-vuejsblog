@@ -1,0 +1,16 @@
+packages:
+  - packages/*
+  - playground
+
+# Pin rollup to a release that is old enough to clear the machine's
+# `minimumReleaseAge` supply-chain policy. Without this, `pnpm install` refuses to
+# materialise the tree at all, because rollup 4.63.6 was published inside the
+# policy window. This is an install-time concern only; the Theme itself does not
+# depend on rollup.
+overrides:
+  rollup: 4.63.5
+
+# esbuild ships a native binary that has to be downloaded by its install script.
+# pnpm blocks install scripts by default, so it must be allowlisted explicitly.
+allowBuilds:
+  esbuild: true

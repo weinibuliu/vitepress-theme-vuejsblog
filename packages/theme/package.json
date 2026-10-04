@@ -1,0 +1,58 @@
+{
+  "name": "vitepress-theme-vuejsblog",
+  "version": "0.1.0",
+  "description": "A personal-blog theme for VitePress in the style of blog.vuejs.org",
+  "keywords": [
+    "blog",
+    "theme",
+    "vitepress",
+    "vitepress-theme",
+    "vue"
+  ],
+  "homepage": "https://github.com/CHANGE_ME/vitepress-theme-vuejsblog#readme",
+  "bugs": "https://github.com/CHANGE_ME/vitepress-theme-vuejsblog/issues",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CHANGE_ME/vitepress-theme-vuejsblog.git"
+  },
+  "files": [
+    "dist",
+    "src",
+    "presets",
+    "config.js",
+    "config.d.ts",
+    "posts.data.ts"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./config.d.ts",
+      "default": "./config.js"
+    },
+    "./feed": {
+      "types": "./dist/feed.d.ts",
+      "default": "./dist/feed.js"
+    },
+    "./style.css": "./dist/style.css",
+    "./presets/*.css": "./presets/*.css"
+  },
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "pnpm clean && tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@mdit/plugin-tab": "^2.0.2",
+    "feed": "^4.2.2",
+    "gray-matter": "^4.0.3"
+  },
+  "peerDependencies": {
+    "vitepress": "2.0.0-alpha.20",
+    "vue": "^3.5.0"
+  }
+}
