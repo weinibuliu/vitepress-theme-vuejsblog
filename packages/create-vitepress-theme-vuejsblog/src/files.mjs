@@ -4,8 +4,7 @@ import {
   PRESET_MARKS,
   THEME_PACKAGE,
   VITEPRESS_VERSION,
-  VUE_VERSION,
-  FALLBACK_PNPM_VERSION
+  VUE_VERSION
 } from './constants.mjs'
 import { template } from './templates.mjs'
 
@@ -60,7 +59,6 @@ const DEV_COMMAND = {
 
 export function createFiles(answers, options = {}) {
   const today = options.today ?? new Date()
-  const pnpmVersion = options.pnpmVersion ?? FALLBACK_PNPM_VERSION
   const date = isoDate(today)
   const year = today.getFullYear()
 
@@ -83,8 +81,7 @@ export function createFiles(answers, options = {}) {
 
   if (answers.deploy) {
     files['.github/workflows/deploy.yml'] = deployWorkflow(
-      answers.packageManager,
-      pnpmVersion
+      answers.packageManager
     )
     files['vercel.json'] = template('vercel.json', [
       JSON.stringify(BUILD_COMMAND[answers.packageManager])
@@ -281,7 +278,7 @@ function logoFile(answers) {
   ])
 }
 
-function deployWorkflow(packageManager, pnpmVersion) {
+function deployWorkflow(packageManager) {
   const setup = []
 
   if (packageManager === 'pnpm') {
@@ -290,7 +287,6 @@ function deployWorkflow(packageManager, pnpmVersion) {
     // literal chosen here would be.
     setup.push('      - uses: pnpm/action-setup@v6')
     setup.push('        with:')
-    setup.push(`          version: ${pnpmVersion}`)
     setup.push(`          cache: true`)
   } else if (packageManager === 'bun') {
     setup.push('      - uses: oven-sh/setup-bun@v2.2.0')
