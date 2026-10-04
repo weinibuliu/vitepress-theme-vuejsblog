@@ -69,11 +69,7 @@ jobs:
       - name: Install Dependency
         run: pnpm install
 
-      # Nothing reads `templates/` at install time, so a broken template only shows up in a
-      # stranger's scaffold. The suite is the gate that would catch it — but it is currently
-      # red on `main` for reasons unrelated to publishing (the generated deploy workflow
-      # outgrew its template), so it is deliberately left out of this pipeline. Add
-      # `- run: pnpm test` here once it is green.
+      - run: pnpm test
 
       - name: Resolve version and dist-tag
         id: package
