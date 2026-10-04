@@ -12,12 +12,7 @@ import type { ThemeConfig } from 'vitepress-theme-vuejsblog'
  */
 export default defineConfig<ThemeConfig>({
   extends: blogConfig(path.resolve(import.meta.dirname, '..')),
-  ignoreDeadLinks: [
-    // ignore http(s)://localhost/**
-    /^https?:\/\/localhost/,
-    // ignore exclude demo URL
-    './demo/exclude'
-  ],
+  ignoreDeadLinks: true,
   buildEnd: (config) => genFeed(config),
   // Tabs are off unless a Site asks for them. This Site asks, so that the demo page exercises
   // the whole path — the option, the markdown hook that reads it, and the rendered component.
