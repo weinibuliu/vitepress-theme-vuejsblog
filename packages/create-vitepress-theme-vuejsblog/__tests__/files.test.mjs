@@ -133,6 +133,36 @@ describe('createFiles', () => {
     expect(manifest.devDependencies['vitepress-theme-vuejsblog']).toBe('^0.1.0')
   })
 
+  it('records the detected pnpm version where the CI action will read it', () => {
+    // This field is the whole reason the generated workflow can leave `version:` out of
+    // `pnpm/action-setup`. Without it the action has nothing to install.
+    const manifest = JSON.parse(
+      build({ packageManager: 'pnpm' }, { pnpmVersion: '9.15.0' })[
+        'package.json'
+      ]
+    )
+
+    expect(manifest.packageManager).toBe('pnpm@9.15.0')
+  })
+
+  it('falls back to an exact pnpm version when none was detected', () => {
+    // Corepack rejects a range here — "expected a semver version" — so the fallback has
+    // to be a version, not the major.
+    const manifest = JSON.parse(
+      build({ packageManager: 'pnpm' })['package.json']
+    )
+
+    expect(manifest.packageManager).toMatch(/^pnpm@\d+\.\d+\.\d+$/)
+  })
+
+  it('claims no pnpm version for a package manager that is not pnpm', () => {
+    const manifest = JSON.parse(
+      build({ packageManager: 'npm' })['package.json']
+    )
+
+    expect(manifest.packageManager).toBeUndefined()
+  })
+
   it('hands the Theme to VitePress from the theme entry', () => {
     const entry = build()['.vitepress/theme/index.ts']
 
@@ -262,14 +292,18 @@ describe('the generated deploy config', () => {
     ).toBe('pnpm build')
   })
 
-  it('installs the reported pnpm version in CI', () => {
-    const workflow = build(
-      { packageManager: 'pnpm' },
-      { pnpmVersion: '9.15.0' }
-    )['.github/workflows/deploy.yml']
+  it('caches the pnpm store rather than pinning a version in CI', () => {
+    const workflow = build({ packageManager: 'pnpm' })[
+      '.github/workflows/deploy.yml'
+    ]
 
-    expect(workflow).toContain('uses: pnpm/action-setup@v4')
-    expect(workflow).toContain('version: 9.15.0')
+    // The block, not just the action name: `version` must not be among the inputs. The
+    // version belongs to the Site's own package.json, where Corepack and the developer's
+    // own tooling already read it, and a literal here would be a second copy to keep in
+    // step.
+    expect(workflow).toMatch(
+      /uses: pnpm\/action-setup@v6\.1\.0\n\s+with:\n\s+cache: true\n/
+    )
     expect(workflow).toContain('run: pnpm install')
     expect(workflow).toContain('run: pnpm build')
   })
@@ -284,11 +318,25 @@ describe('the generated deploy config', () => {
     expect(workflow).toContain('run: npm run build')
   })
 
+  it('keeps one blank line between steps, and no more', () => {
+    const workflow = build({ packageManager: 'pnpm' })[
+      '.github/workflows/deploy.yml'
+    ]
+
+    expect(workflow).toContain(
+      '          cache: true\n\n      - name: Setup Node'
+    )
+    expect(workflow).toContain(
+      '          node-version: 22\n\n      - name: Install Dependence'
+    )
+    expect(workflow).not.toMatch(/\n\n\n/)
+  })
+
   it('publishes the build output to Pages', () => {
     const workflow = build()['.github/workflows/deploy.yml']
 
     expect(workflow).toContain('path: .vitepress/dist')
-    expect(workflow).toContain('uses: actions/deploy-pages@v4')
+    expect(workflow).toContain('uses: actions/deploy-pages@v5.0.0')
     expect(workflow).toContain('branches: [main]')
   })
 })

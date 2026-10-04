@@ -21,7 +21,6 @@ jobs:
       - uses: actions/checkout@v6.1.0
 
 %s
-
       - name: Install Dependence
         run: %s
 
@@ -32,7 +31,6 @@ jobs:
         uses: actions/configure-pages@v6.0.0
         with:
           enablement: true
-
 
       - uses: actions/upload-pages-artifact@v5.0.0
         with:

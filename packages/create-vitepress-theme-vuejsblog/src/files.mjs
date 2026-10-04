@@ -1,5 +1,6 @@
 import {
   BRAND_PRESET_DIR,
+  FALLBACK_PNPM_VERSION,
   NODE_TYPES_VERSION,
   PRESET_MARKS,
   THEME_PACKAGE,
@@ -62,8 +63,13 @@ export function createFiles(answers, options = {}) {
   const date = isoDate(today)
   const year = today.getFullYear()
 
+  // Detection is the caller's job — `run.mjs` asks the machine and passes the answer in,
+  // and only it can. A caller that has not asked gets the fallback rather than a
+  // manifest with `undefined` in it.
+  const pnpmVersion = options.pnpmVersion ?? FALLBACK_PNPM_VERSION
+
   const files = {
-    'package.json': packageFile(answers),
+    'package.json': packageFile(answers, pnpmVersion),
     'tsconfig.json': template('tsconfig.json'),
     '.gitignore': template('.gitignore'),
     'README.md': readmeFile(answers, date),
@@ -190,10 +196,26 @@ function escapeHtml(value) {
  * package name comes from a directory the caller named, and a name with a quote or a
  * backslash in it must not be able to break the manifest. The keys are constants and
  * cannot.
+ *
+ * `packageManager` is the exception that is not a key: its value is interpolated by the
+ * caller, so it goes through `JSON.stringify` too.
  */
-function packageFile(answers) {
+function packageFile(answers, pnpmVersion) {
+  // What lets the generated deploy workflow leave `version:` out of `pnpm/action-setup`:
+  // the action reads this field rather than taking a literal, so the Site's pnpm version
+  // lives in one place. Only pnpm gets one — it is the only package manager the
+  // scaffolder can ask the machine for a version of, and the only one whose CI action
+  // needs the answer.
+  const packageManager =
+    answers.packageManager === 'pnpm'
+      ? `  "packageManager": ${JSON.stringify(`pnpm@${pnpmVersion}`)},\n`
+      : ''
+
+  // Left to right, the order the placeholders appear in the template: `packageManager`
+  // is second because the field sits under `type`, above `scripts`.
   return template('package.json', [
     JSON.stringify(answers.packageName),
+    packageManager,
     JSON.stringify(NODE_TYPES_VERSION),
     JSON.stringify(VITEPRESS_VERSION),
     JSON.stringify(THEME_PACKAGE),
@@ -283,34 +305,43 @@ function logoFile(answers) {
 }
 
 function deployWorkflow(packageManager) {
+  // Steps, not lines: each call lands as one block, with the blank line between them
+  // supplied here rather than by the template.
   const setup = []
+  const addStep = (...lines) => {
+    if (setup.length > 0) setup.push('')
+    setup.push(...lines)
+  }
 
   if (packageManager === 'pnpm') {
-    // `pnpm/action-setup` refuses to run without a version, and reading the caller's
-    // own is more likely to match the lockfile they are about to commit than a
-    // literal chosen here would be.
-    setup.push('      - name: Setup pnpm')
-    setup.push('        uses: pnpm/action-setup@v6.1.0')
-    setup.push('        with:')
-    setup.push(`          cache: true`)
+    // `cache`, and no `version`: the action takes the version from the Site's own
+    // package.json — see `packageFile` — so writing one here would only be a second
+    // copy to keep in step with it, and a copy that goes stale the moment the Site
+    // moves on.
+    addStep(
+      '      - name: Setup pnpm',
+      '        uses: pnpm/action-setup@v6.1.0',
+      '        with:',
+      '          cache: true'
+    )
   } else if (packageManager === 'bun') {
-    setup.push('      - name: Setup bun')
-    setup.push('        uses: oven-sh/setup-bun@v2.2.0')
+    addStep('      - name: Setup bun', '        uses: oven-sh/setup-bun@v2.2.0')
   }
 
   if (packageManager !== 'bun') {
-    setup.push('      - name: Setup Node')
-    setup.push('        uses: actions/setup-node@v6.5.0')
-    setup.push('        with:')
-    setup.push('          node-version: 22')
+    addStep(
+      '      - name: Setup Node',
+      '        uses: actions/setup-node@v6.5.0',
+      '        with:',
+      '          node-version: 22'
+    )
   }
 
-  // Deliberately no `cache:` — it fails outright when the lock file is missing, and
-  // this workflow is committed before the first install may have happened. The note in
-  // the generated file says how to turn it on once that is no longer true.
+  // `actions/setup-node` gets no `cache:` of its own: it fails outright when the lock
+  // file is missing, and this workflow is committed before the first install may have
+  // happened. The pnpm store is cached by the action above instead.
   return template('.github/workflows/deploy.yml', [
     `${setup.join('\n')}\n`,
-    packageManager,
     INSTALL_COMMAND[packageManager],
     BUILD_COMMAND[packageManager]
   ])

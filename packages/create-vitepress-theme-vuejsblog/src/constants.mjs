@@ -74,7 +74,12 @@ export const DEFAULT_TARGET = 'my-blog'
 export const DEFAULT_LANG = 'en'
 
 /**
- * pnpm's version when it cannot be detected. Only the generated CI workflow needs
- * it, and `pnpm/action-setup` refuses to run without one.
+ * pnpm's version when it cannot be detected.
+ *
+ * Exact, not a range like `10`, because it is written into the Site's `packageManager`
+ * field: Corepack refuses anything there that is not a semver version, and
+ * `pnpm/action-setup` reads that same field to decide which pnpm to install. It mirrors
+ * the version this repository pins for itself, so the fallback is a version the
+ * templates are known to work with.
  */
-export const FALLBACK_PNPM_VERSION = '10'
+export const FALLBACK_PNPM_VERSION = '12.8.1'
