@@ -4,10 +4,10 @@ date: 2026-09-30
 draft: true
 ---
 
-Tabs, inspired by [Vuepress Theme Hope](https://theme-hope.vuejs.press/guide/markdown/content/tabs.html)
+Tabs, inspired by [Vuepress Theme Hope](https://theme-hope.vuejs.press/guide/markdown/content/tabs.html).
 
 > [!NOTE]
-> Different from [Vuepress Theme Hope](https://theme-hope.vuejs.press/guide/markdown/content/tabs.html), tab id's choice will **NOT** be stored and persisted. It's by designed.
+> Different from Vuepress Theme Hope, tab id's choice will **NOT** be stored and persisted.
 
 <!-- more -->
 
@@ -17,9 +17,7 @@ Tabs, inspired by [Vuepress Theme Hope](https://theme-hope.vuejs.press/guide/mar
 
 For enable tabs, you should edit config file first:
 
-```ts{7}
-// .vitepress/config.ts
-
+```ts{5} [.vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
@@ -31,6 +29,24 @@ export default defineConfig<ThemeConfig>({
 ```
 
 ## A Tab Group
+
+:::: details Raw
+
+```md
+::: tabs
+
+@tab apple
+
+An apple.
+
+@tab banana
+
+A banana.
+
+:::
+```
+
+::::
 
 ::: tabs
 
@@ -45,6 +61,24 @@ A banana.
 :::
 
 ## The default Tab
+
+:::: details Raw
+
+```md
+::: tabs
+
+@tab Rust
+
+Rust is shown only when a reader picks it.
+
+@tab:active Go
+
+Go is the default here, because its marker says so.
+
+:::
+```
+
+::::
 
 `@tab:active` marks the Tab a group opens on. A group that marks none opens on its first.
 
@@ -62,6 +96,28 @@ Go is the default here, because its marker says so.
 
 ## Titles are Markdown
 
+:::: details Raw
+
+````md
+::: tabs
+
+@tab `pnpm`
+
+```bash [pnpm]
+pnpm add vitepress-theme-vuejsblog
+```
+
+@tab **npm**
+
+```bash [npm]
+npm i vitepress-theme-vuejsblog
+```
+
+:::
+````
+
+::::
+
 A title is rendered as inline Markdown, so it can carry `code`, **emphasis** or a link to
 [the guide](../zh-cn/welcome.md).
 
@@ -69,13 +125,13 @@ A title is rendered as inline Markdown, so it can carry `code`, **emphasis** or 
 
 @tab `pnpm`
 
-```bash
+```bash [pnpm]
 pnpm add vitepress-theme-vuejsblog
 ```
 
 @tab **npm**
 
-```bash
+```bash [npm]
 npm i vitepress-theme-vuejsblog
 ```
 
@@ -87,6 +143,42 @@ Tab Groups that state the same Tab Id show the same choice: pick one below and t
 follows, by value rather than by position — which is what the `#value` suffix is for.
 
 The package manager this repository uses:
+
+:::: details Raw
+
+````md
+::: tabs#package-manager
+
+@tab npm
+
+npm ships with Node.
+
+@tab pnpm
+
+pnpm is what this repository is developed with.
+
+:::
+
+Installing the Theme with it:
+
+::: tabs#package-manager
+
+@tab Using npm#npm
+
+```bash [npm]
+npm i vitepress-theme-vuejsblog
+```
+
+@tab Using pnpm#pnpm
+
+```bash [pnpm]
+pnpm add vitepress-theme-vuejsblog
+```
+
+:::
+````
+
+::::
 
 ::: tabs#package-manager
 
@@ -106,13 +198,13 @@ Installing the Theme with it:
 
 @tab Using npm#npm
 
-```bash
+```bash [npm]
 npm i vitepress-theme-vuejsblog
 ```
 
 @tab Using pnpm#pnpm
 
-```bash
+```bash [pnpm]
 pnpm add vitepress-theme-vuejsblog
 ```
 
@@ -122,6 +214,24 @@ pnpm add vitepress-theme-vuejsblog
 
 `#value` also names a Tab for its own content, which reads it as `value` — along with
 `isActive`, so a pane can say something about itself:
+
+:::: details Raw
+
+```md
+::: tabs
+
+@tab Shown#shown
+
+This pane reads `value` as `{{ value }}` and `isActive` as `{{ isActive }}`.
+
+@tab Hidden#hidden
+
+This pane reads `value` as `{{ value }}` and `isActive` as `{{ isActive }}`.
+
+:::
+```
+
+::::
 
 ::: tabs
 
@@ -136,6 +246,25 @@ This pane reads `value` as `{{ value }}` and `isActive` as `{{ isActive }}`.
 :::
 
 Markdown works inside a pane, including callouts and Vue expressions:
+
+:::: details Raw
+
+```md
+::: tabs
+
+@tab A callout
+
+> [!TIP]
+> A pane is ordinary Markdown.
+
+@tab Vue
+
+Two plus two is {{ 2 + 2 }}.
+
+:::
+```
+
+::::
 
 ::: tabs
 
