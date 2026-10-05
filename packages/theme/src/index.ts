@@ -1,9 +1,12 @@
+import type { Theme } from 'vitepress'
+
+import './vitepress.css'
+import './style.css'
+import 'virtual:group-icons.css'
+
 import Layout from './layouts/Layout.vue'
 import BlogTabs from './components/BlogTabs.vue'
 import { TABS_COMPONENT } from './lib/tabsName.js'
-import './vitepress.css'
-import './style.css'
-import type { Theme } from 'vitepress'
 
 /**
  * Components which the site can place itself. The index hero is not among them: it belongs to the
@@ -67,13 +70,6 @@ export { useBlogConfig } from './lib/useBlogConfig.js'
 export { heroSubtextHtml, resolveHeroAvatar } from './lib/hero.js'
 export { absoluteUrl } from './lib/url.js'
 export { faviconHead } from './lib/favicon.js'
-
-/**
- * Feed generation deliberately lives at a separate entry point,
- * `vitepress-theme-vuejsblog/feed`, rather than being re-exported from here.
- * `feed.ts` reaches for `createContentLoader`, which is Node-only, and anything
- * this entry point exports ends up in the browser bundle.
- */
 
 /**
  * The Theme.

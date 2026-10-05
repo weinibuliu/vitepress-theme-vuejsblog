@@ -1,9 +1,14 @@
 import { defineConfig } from 'vitepress'
+
+import {
+  groupIconMdPlugin,
+  groupIconVitePlugin
+} from 'vitepress-plugin-group-icons'
+
 import { readThemeConfig } from './dist/lib/config.js'
 import { faviconHead } from './dist/lib/favicon.js'
 import { scanExcluded } from './dist/lib/scanExcluded.js'
 import { tabsMarkdown } from './dist/lib/tabs.js'
-
 /**
  * The Theme's base VitePress config, given the Site root.
  *
@@ -103,10 +108,22 @@ export default function blogConfig(root) {
        * it, so a Site that needs a markdown-it plugin of its own keeps both — this Theme's first,
        * which is also why a Site's own `tabs` container rule would lose to this one.
        */
-      config: tabsMarkdown
+      config(md) {
+        md.use(tabsMarkdown)
+        md.use(groupIconMdPlugin)
+      },
+
+      /*
+       * Mark `md-external` for all external links
+       */
+      externalLinks: {
+        target: '_blank',
+        rel: 'noreferrer noopener md-external' // TODO: css for md-external
+      }
     },
     lastUpdated: false,
     vite: {
+      plugins: [groupIconVitePlugin()],
       ssr: {
         /**
          * Bundle the Theme into the SSR build rather than letting Node import it.

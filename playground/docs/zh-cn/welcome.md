@@ -81,9 +81,7 @@ npm dev
 本主题的配置文件位于 `./vitepress/config.ts`。
 我们将在后文逐步介绍主题配置。
 
-```ts
-// .vitepress/config.ts
-
+```ts [.vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
@@ -109,9 +107,7 @@ export default defineConfig<ThemeConfig>({
 
 通过 `themeConfig.title` 与 `themeConfig.description` 字段设置网站的标题与描述。
 
-```ts
-// .vitepress/config.ts
-
+```ts [.vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
@@ -129,9 +125,7 @@ export default defineConfig<ThemeConfig>({
 
 通过 `themeConfig.blog.hero` 字段设置首页 Hero 。
 
-```ts
-// .vitepress/config.ts
-
+```ts [.vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
@@ -152,8 +146,7 @@ export default defineConfig<ThemeConfig>({
 
 ## 网站语言
 
-```ts
-// .vitepress/config.ts
+```ts [.vitepress/config.ts]
 
 export default defineConfig<ThemeConfig>({
   // ...
@@ -172,9 +165,7 @@ export default defineConfig<ThemeConfig>({
 
 可以通过修改 `themeConfig.blog.posts` 来调整目录结构。
 
-```ts
-// .vitepress/config.ts
-
+```ts [.vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
@@ -188,13 +179,11 @@ export default defineConfig<ThemeConfig>({
 
 调整之后，主题会同时读取 `posts/`下的全部 `*.md` 文件，并递归读取 `docs/` 目录下所有 `*.md` 文件。
 
-### 首页顶栏
+## 首页顶栏
 
 > 本站的顶栏设置。
 
-```ts
-// .vitepress/config.ts
-
+```ts [vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
@@ -218,8 +207,7 @@ export default defineConfig<ThemeConfig>({
 
 主题默认会为所有文章生成 TOC 侧栏，可以通过 `themeConfig.blog.toc: false` 禁用。
 
-```ts
-// .vitepress/config.ts
+```ts [.vitepress/config.ts]
 
 export default defineConfig<ThemeConfig>({
   // ...
@@ -266,9 +254,7 @@ pin: true
 文章作者信息的优先级为：
 文件级作者定义 > [域级](#按域定义作者)作者定义 > 主题级作者定义
 
-```ts
-// .vitepress/config.ts
-
+```ts [.vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
@@ -318,9 +304,7 @@ author: Example 3
 
 > 以下配置的效果可参见[这篇文章](../en-us/not-ready-for-production.md)
 
-```ts
-// .vitepress/config.ts
-
+```ts [.vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
