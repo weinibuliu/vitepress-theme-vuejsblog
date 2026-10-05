@@ -12,6 +12,9 @@ import type { ThemeConfig } from 'vitepress-theme-vuejsblog'
  */
 export default defineConfig<ThemeConfig>({
   extends: blogConfig(path.resolve(import.meta.dirname, '..')),
+  title: 'Vitepress Theme Vuejs Blog',
+  description: 'The website of vitepress-theme-vuejsblog',
+  lang: 'zh-CN',
   base: '/vitepress-theme-vuejsblog/',
   ignoreDeadLinks: true,
   buildEnd: (config) => genFeed(config),
@@ -23,7 +26,6 @@ export default defineConfig<ThemeConfig>({
       toc: false,
       posts: ['posts/*.md', 'docs/**/*.md'],
       excerptSeparator: '---',
-      title: 'Vitepress Theme Vuejs Blog',
       hero: {
         title: 'Vitepress Theme Vuejs Blog',
         avatar: false,
@@ -67,7 +69,8 @@ export default defineConfig<ThemeConfig>({
         // instead of fetching the Feed. Opening it in a new tab is what a reader wants anyway.
         { text: 'RSS Feed', link: '/feed.rss', external: true }
       ],
-      feed: { language: 'en-US' }
+      feed: { language: 'en-US' },
+      locale: 'en-US'
     }
   }
 })

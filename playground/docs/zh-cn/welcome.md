@@ -108,9 +108,10 @@ export default defineConfig<ThemeConfig>({
 
 ### 网站标题与描述
 
-通过 `themeConfig.blog.title` 与 `themeConfig.blog.description` 字段设置网站的标题与描述。
+> [!WARNING]
+> 始终需要正确设置 `themeConfig.title` 与 `themeConfig.description` 。
 
-> 以上字段仅支持纯文本
+通过 `themeConfig.title` 与 `themeConfig.description` 字段设置网站的标题与描述。
 
 ```ts
 // .vitepress/config.ts
@@ -118,9 +119,11 @@ export default defineConfig<ThemeConfig>({
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
+    title: 'The Website Title',
+    description: 'The description of website',
     blog: {
-      title: 'The Website Title',
-      description: 'The description of website'
+      siteTitle: 'Another Title',
+      siteSubtext: 'Another <a href="/">Description</a>' // siteSubtext 支持 HTML
     }
   }
 })
@@ -130,15 +133,14 @@ export default defineConfig<ThemeConfig>({
 
 通过 `themeConfig.blog.hero` 字段设置首页 Hero 。
 
-> [!WARNING]
-> 即便设置了 `themeConfig.blog.hero` 也需要正确设置 `themeConfig.blog.title` 与 `themeConfig.blog.description` 。
-
 ```ts
 // .vitepress/config.ts
 
 export default defineConfig<ThemeConfig>({
   // ...
   themeConfig: {
+    title: 'The Website Title',
+    description: 'The description of website',
     blog: {
       hero: {
         title: 'Vitepress Theme Vuejs Blog',
@@ -246,7 +248,7 @@ export default defineConfig<ThemeConfig>({
         github: 'https://github.com/weinibuliu'
       }
       // 当然，也可以只提供一个字符串
-      // author: 'Example 1'}
+      // author: 'Example 1'
     }
   }
 })

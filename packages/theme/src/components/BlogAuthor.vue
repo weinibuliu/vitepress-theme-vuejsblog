@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useData } from 'vitepress'
+
 import BlogSocialLinks from './BlogSocialLinks.vue'
 import type { ResolvedAuthor } from '../lib/types.js'
 import type { LangStrings } from '../lib/i18n.js'
@@ -35,7 +37,9 @@ const props = defineProps<{
 }>()
 
 const blog = useBlogConfig()
-const strings = computed(() => props.strings ?? useLang(blog.value.lang))
+const { site } = useData()
+
+const strings = computed(() => props.strings ?? useLang(site.value.lang))
 
 function isExternal(url: string): boolean {
   return /^https?:\/\//i.test(url)

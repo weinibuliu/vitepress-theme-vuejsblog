@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useData, withBase } from 'vitepress'
+
 import { data as posts } from '../../posts.data.js'
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
@@ -20,9 +21,9 @@ import type { Post } from '../lib/types.js'
  * array is the index, and it runs the other way round. See
  * `docs/adr/0011-navigation-follows-the-sorting-key.md`.
  */
-const { frontmatter, page } = useData()
+const { frontmatter, page, site } = useData()
 const blog = useBlogConfig()
-const strings = computed(() => useLang(blog.value.lang))
+const strings = computed(() => useLang(site.value.lang))
 
 /**
  * Which Post is being rendered.

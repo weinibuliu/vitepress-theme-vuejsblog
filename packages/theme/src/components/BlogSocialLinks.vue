@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useData } from 'vitepress'
+
 import BlogSocialIcon from './BlogSocialIcon.vue'
 import type { LangStrings } from '../lib/i18n.js'
 import { useLang } from '../lib/i18n.js'
@@ -31,7 +33,9 @@ const props = withDefaults(
 )
 
 const blog = useBlogConfig()
-const strings = computed(() => props.strings ?? useLang(blog.value.lang))
+const { site } = useData()
+
+const strings = computed(() => props.strings ?? useLang(site.value.lang))
 
 /**
  * The text for a sole Social Link, `undefined` when there are several.

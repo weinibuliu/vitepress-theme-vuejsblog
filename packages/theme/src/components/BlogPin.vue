@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useData } from 'vitepress'
+
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
 
@@ -15,7 +17,9 @@ import { useLang } from '../lib/i18n.js'
  * rather than preceded by an unnamed graphic.
  */
 const blog = useBlogConfig()
-const strings = computed(() => useLang(blog.value.lang))
+const { site } = useData()
+
+const strings = computed(() => useLang(site.value.lang))
 </script>
 
 <template>

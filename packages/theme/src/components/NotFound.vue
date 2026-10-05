@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute, withBase } from 'vitepress'
+import { useData, useRoute, withBase } from 'vitepress'
+
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
 import { requestedLocation } from '../lib/url.js'
@@ -18,8 +19,9 @@ import { requestedLocation } from '../lib/url.js'
  * the reason and the height chain that makes it work.
  */
 const route = useRoute()
-const blog = useBlogConfig()
-const strings = computed(() => useLang(blog.value.lang))
+const { site } = useData()
+
+const strings = computed(() => useLang(site.value.lang))
 
 /**
  * The route object is reactive and the 404 is not remounted when one bad URL follows

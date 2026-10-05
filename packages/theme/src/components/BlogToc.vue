@@ -9,6 +9,7 @@ import {
   watch
 } from 'vue'
 import { onContentUpdated, useData } from 'vitepress'
+
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
 import {
@@ -45,9 +46,9 @@ import BlogTocList from './BlogTocList.vue'
  * Site which states `markdown: { headers: false }` reaches this component with an empty list,
  * and gets no TOC.
  */
-const { frontmatter, page } = useData()
+const { frontmatter, page, site } = useData()
 const blog = useBlogConfig()
-const strings = computed(() => useLang(blog.value.lang))
+const strings = computed(() => useLang(site.value.lang))
 const titleId = useId()
 const list = useTemplateRef('list')
 
@@ -211,7 +212,7 @@ onMounted(() => {
 watch(active, (link) => {
   if (!link || !list.value) return
 
-  for (const anchor of list.value.querySelectorAll('a')) {
+  for (const anchor of Array.from(list.value.querySelectorAll('a'))) {
     if (anchor.getAttribute('href') !== link) continue
     anchor.scrollIntoView({ block: 'nearest' })
     return

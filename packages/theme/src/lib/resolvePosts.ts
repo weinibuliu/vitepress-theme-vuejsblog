@@ -1,4 +1,4 @@
-import type { ContentData } from 'vitepress'
+import { type ContentData } from 'vitepress'
 import {
   formatDate,
   parseDate,
@@ -64,17 +64,13 @@ export function resolvePosts(
   const {
     author: defaultAuthor,
     authorScopes,
-    lang,
     locale,
-    dateFormat,
-    feed
+    dateFormat
   } = themeConfig
 
   const { mode, direction } = themeConfig.sort
 
-  const feedLanguage =
-    feed && typeof feed === 'object' ? feed.language : undefined
-  const resolvedLocale = locale ?? lang ?? feedLanguage ?? 'en-US'
+  const resolvedLocale = locale
   const resolvedFormat = dateFormat ?? DEFAULT_DATE_FORMAT
 
   const posts: Post[] = []

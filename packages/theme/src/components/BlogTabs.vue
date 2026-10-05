@@ -8,8 +8,8 @@ import {
   useTemplateRef,
   watch
 } from 'vue'
-import { useData } from 'vitepress'
-import { useBlogConfig } from '../lib/useBlogConfig.js'
+import { useData, useRoute } from 'vitepress'
+
 import { useLang } from '../lib/i18n.js'
 import {
   joinPage,
@@ -84,9 +84,10 @@ const props = withDefaults(
   { active: 0 }
 )
 
-const { page } = useData()
-const blog = useBlogConfig()
-const strings = computed(() => useLang(blog.value.lang))
+const { site } = useData()
+const route = useRoute()
+
+const strings = computed(() => useLang(site.value.lang))
 const nav = useTemplateRef<HTMLDivElement>('nav')
 
 /** Unique per group, and the same on the server and in the browser — `useId` says so. */
@@ -102,7 +103,7 @@ const activeIndex = ref(props.active)
  * releasing the page they moved *to* would both strand the entry this group created and clear
  * the choices of the page arriving.
  */
-const path = page.value.path
+const path = route.path
 
 /**
  * This group's page store, once it has joined one. Absent before mount, which is also the whole
@@ -120,7 +121,9 @@ function select(index: number): void {
 
 /** The row's buttons, in the order the Post wrote them. */
 function buttons(): HTMLButtonElement[] {
-  return [...(nav.value?.querySelectorAll<HTMLButtonElement>('button') ?? [])]
+  return Array.from(
+    nav.value?.querySelectorAll<HTMLButtonElement>('button') ?? []
+  )
 }
 
 /**

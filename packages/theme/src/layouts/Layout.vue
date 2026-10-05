@@ -29,7 +29,7 @@ import NotFound from '../components/NotFound.vue'
  * child is that a modifier here states the condition — `page.isNotFound`, the same one the
  * template dispatches on — once instead of twice.
  */
-const { page, frontmatter } = useData()
+const { page, frontmatter, site } = useData()
 const blog = useBlogConfig()
 const slots = useSlots()
 
@@ -47,7 +47,7 @@ function isExternal(link: string): boolean {
   return /^https?:\/\//i.test(link) || link.startsWith('mailto:')
 }
 
-const title = computed(() => blog.value.title)
+const title = computed(() => site.value.title)
 const logo = computed(() => blog.value.logo)
 
 /**

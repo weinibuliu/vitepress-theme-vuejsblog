@@ -18,7 +18,7 @@ import BlogPin from './BlogPin.vue'
  * personal blog wants where the reference site's project heading is not. The two share the
  * heading slots, so overriding the title works either way.
  */
-const { frontmatter } = useData()
+const { frontmatter, site } = useData()
 const blog = useBlogConfig().value
 
 const title = computed(() =>
@@ -26,14 +26,14 @@ const title = computed(() =>
     ? ''
     : ((frontmatter.value.title as string | undefined) ??
       blog.siteTitle ??
-      blog.title)
+      site.value.title)
 )
 const subtext = computed(
   () =>
-    (frontmatter.value.subtext as string | undefined) ?? blog.description ?? ''
+    (frontmatter.value.subtext as string | undefined) ?? site.value.description
 )
-const subtextHtml = computed(() => blog.siteSubText ?? undefined)
-const strings = computed(() => useLang(blog.lang))
+const subtextHtml = computed(() => blog.siteSubtext ?? undefined)
+const strings = computed(() => useLang(site.value.lang))
 
 const hero = computed(() => blog.hero)
 const heroTitle = computed(() => hero.value?.title ?? title.value)

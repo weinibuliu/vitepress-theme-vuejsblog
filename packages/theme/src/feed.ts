@@ -82,6 +82,8 @@ export async function genFeed(
 
   const rendered = await renderFeed({
     blog,
+    title: config.site.title,
+    description: config.site.description,
     srcDir: config.srcDir,
     siteBase: config.site.base,
     warn: (message) => config.logger.warn(message)
@@ -163,6 +165,8 @@ function escapeXml(value: string): string {
 
 export interface RenderFeedArgs {
   blog: ResolvedBlogConfig
+  title: string
+  description: string
   srcDir: string
   siteBase: string
   /**
@@ -200,6 +204,8 @@ export interface RenderedFeed {
  */
 export async function renderFeed({
   blog,
+  title,
+  description,
   srcDir,
   siteBase,
   warn
@@ -231,8 +237,8 @@ export async function renderFeed({
   const link = joinUrl(prefix, '/')
 
   const feed = new Feed({
-    title: blog.title,
-    description: blog.description ?? '',
+    title: title,
+    description: description,
     id: link,
     link,
     language: feedOptions.language,

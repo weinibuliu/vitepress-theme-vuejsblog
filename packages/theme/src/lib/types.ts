@@ -467,26 +467,9 @@ export interface FeedOptions {
  */
 export interface BlogThemeConfig {
   /**
-   * The website's title. Required.
-   *
-   * Used as the nav title, the home page heading, the Feed title,
-   * and the fallback HTML `<title>`.
-   */
-  title: string
-
-  /**
-   * A one- or two-sentence description of the blog.
-   *
-   * Used as the home page subtext, the default HTML description,
-   * and the Feed description.
-   *
-   */
-  description?: string
-
-  /**
    * The display title shown in the nav. Optional.
    *
-   * Defaults to `themeConfig.blog.title`.
+   * Defaults to `themeConfig.title`.
    */
   siteTitle?: string | false
 
@@ -495,7 +478,7 @@ export interface BlogThemeConfig {
    *
    * Support HTML
    */
-  siteSubText?: string
+  siteSubtext?: string
 
   /**
    * The Blog's origin — scheme, host and port alone, e.g. `https://example.com`, with no path.
@@ -570,19 +553,10 @@ export interface BlogThemeConfig {
   footer?: FooterConfig
 
   /**
-   * The language of the Theme's own interface strings — "Next Article", "Read more",
-   * "404 Page Not Found" and so on. Matching is on the primary subtag, so `zh-CN` and
-   * `zh-Hans` both work. An unknown tag falls back to English.
-   *
-   * @default 'en'
-   */
-  lang?: string
-
-  /**
    * A BCP 47 language tag used for date formatting. Defaults to `lang`, so a Site that
    * only wants its own language usually sets that one alone.
    *
-   * @default lang ?? feed.language ?? 'en-US'
+   * @default lang
    */
   locale?: string
 

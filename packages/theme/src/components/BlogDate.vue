@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useData } from 'vitepress'
+
 import type { Post } from '../lib/types.js'
 import type { LangStrings } from '../lib/i18n.js'
 import { useLang } from '../lib/i18n.js'
@@ -28,7 +30,9 @@ const props = defineProps<{
 }>()
 
 const blog = useBlogConfig()
-const strings = computed(() => props.strings ?? useLang(blog.value.lang))
+const { site } = useData()
+
+const strings = computed(() => props.strings ?? useLang(site.value.lang))
 
 const iso = computed(
   () => props.date.iso ?? new Date(props.date.time).toISOString().slice(0, 10)

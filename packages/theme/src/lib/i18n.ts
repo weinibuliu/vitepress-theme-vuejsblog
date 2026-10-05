@@ -117,9 +117,9 @@ const tables: Record<string, LangStrings> = {
  * same table, and an unknown tag resolves to English rather than to nothing.
  */
 export function useLang(lang = 'en'): LangStrings {
-  const normalised = lang.toLowerCase()
-  const base = normalised.split('-')[0]
-  return tables[base] ?? tables[normalised] ?? en
+  const normalized = lang.toLowerCase()
+  const base = normalized.split('-')[0]
+  return tables[base] ?? tables[normalized] ?? en
 }
 
 /**

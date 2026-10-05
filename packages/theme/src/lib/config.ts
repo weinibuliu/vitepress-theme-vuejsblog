@@ -64,10 +64,8 @@ export function withDefaults(
   siteLang?: string
 ): ResolvedBlogConfig {
   return {
-    title: blog?.title ?? 'My Blog',
-    description: blog?.description,
     siteTitle: blog?.siteTitle,
-    siteSubText: blog?.siteSubText,
+    siteSubtext: blog?.siteSubtext,
     baseUrl: blog?.baseUrl,
     author: blog?.author ?? FALLBACK_AUTHOR,
     authorScopes: blog?.authorScopes,
@@ -81,8 +79,7 @@ export function withDefaults(
       text: blog?.footer?.text,
       links: blog?.footer?.links ?? []
     },
-    lang: blog?.lang ?? siteLang,
-    locale: blog?.locale,
+    locale: blog?.locale ?? siteLang,
     dateFormat: blog?.dateFormat,
     sort: readSort(blog?.sort),
     toc: blog?.toc ?? DEFAULT_TOC,
