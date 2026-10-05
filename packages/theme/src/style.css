@@ -781,32 +781,162 @@
 /* -------------------------------------------------------------------- toc */
 
 /**
- * A Post's TOC, in two renderings: a collapsed `<details>` below 1280px, and the list itself
- * in the frame's left column from 1280px up. Both are always in the document —
- * `components/BlogToc.vue` says why — so all that is left here is deciding which one each
- * width shows, and how the column's copy behaves once it is sticky.
+ * The bar's height, kept private rather than added to the documented variables in `:root`.
+ *
+ * `2.9375rem` is not a round number the Theme picked. It is 47px, which is what the default
+ * theme's own local nav measures and what `vp-doc.css` already assumes a page's top chrome
+ * takes: `.vp-doc [id]`'s `scroll-margin-top` starts at `2.9375rem`. Keeping the bar that tall
+ * is the whole reason an anchor jump lands below it without the Theme restating the offset —
+ * and the reason a Site changing this would silently break that arithmetic.
+ */
+.vp-blog-ui-toc {
+  --vp-blog-toc-bar-height: 2.9375rem;
+}
+
+/**
+ * A Post's TOC, in two renderings: the list itself in the frame's left column from 1280px up,
+ * and below that a fixed bar whose trigger opens the same list as a native popover. Both are
+ * always in the document — `components/BlogToc.vue` says why — so all that is left here is
+ * deciding which width shows which, and how the column's copy behaves once it is sticky.
  *
  * The narrow rendering is what the file declares first, because it is the one that needs no
- * layout: a bordered row that reads like the Next/Previous blocks above it and opens in place.
- * From 1280px up the same markup is placed in the column, sticks, and hides the disclosure
- * instead — and the column's copy is the one that has to scroll on its own.
+ * layout: a bar pinned to the top of the viewport, which the script reveals once the site nav
+ * has scrolled away. From 1280px up the same markup is placed in the column and sticks, the
+ * bar and the panel are hidden, and the column's copy is the one that has to scroll on its own.
  */
 .vp-blog-ui-toc-nav {
   display: none;
 }
 
-.vp-blog-ui-toc-disclosure {
-  border-top: 1px solid var(--vp-c-divider);
-  border-bottom: 1px solid var(--vp-c-divider);
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+/* The bar is only ever rendered below 1280px; above that the column already has the list. */
+.vp-blog-ui-toc-bar {
+  display: none;
 }
 
-.vp-blog-ui-toc-summary {
-  padding: 1rem 0;
+@media (max-width: 1279.98px) {
+  /**
+   * Fixed rather than sticky, and that is the point: a sticky bar entering the flow at the
+   * moment it appeared would push the Post down by its own height, and the reader would watch
+   * the page jump under their finger. Out of flow, it costs the Post nothing.
+   */
+  .vp-blog-ui-toc-bar {
+    display: block;
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: var(--vp-z-index-local-nav, 20);
+    height: var(--vp-blog-toc-bar-height);
+    background-color: var(--vp-c-bg);
+    border-bottom: 1px solid var(--vp-c-divider);
+  }
+
+  .vp-blog-ui-toc-bar:not(.is-visible) {
+    display: none;
+  }
+
+  /* The measure and the gutter the Post's own column uses, so the trigger sits on the same
+     left edge as the text it indexes however wide the viewport is. */
+  .vp-blog-ui-toc-bar-inner {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    max-width: var(--vp-blog-layout-measure);
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 var(--vp-blog-layout-gutter);
+  }
+
+  /**
+   * The whole height of the bar is the target, not just the text in it: on a phone this is a
+   * thumb's control, and a 20px-tall button is not one.
+   */
+  .vp-blog-ui-toc-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    color: var(--vp-c-text-2);
+    cursor: pointer;
+    transition: color 0.25s;
+  }
+
+  .vp-blog-ui-toc-trigger:hover {
+    color: var(--vp-c-text-1);
+  }
+
+  .vp-blog-ui-toc-chevron {
+    flex: none;
+    transition: transform 0.25s;
+  }
+
+  /**
+   * Read from the popover's own state rather than from the copy the script keeps, so a reader
+   * with no script still sees a chevron pointing the way the panel actually is.
+   */
+  .vp-blog-ui-toc:has(.vp-blog-ui-toc-panel:popover-open)
+    .vp-blog-ui-toc-chevron {
+    transform: rotate(90deg);
+  }
+}
+
+/**
+ * The list the trigger reveals.
+ *
+ * A popover puts this in the top layer, which is what frees it from the column's stacking
+ * context and from any `overflow` between it and the viewport, and what hands the Theme light
+ * dismiss and Escape with no script. The platform's own stylesheet for `[popover]` is
+ * `inset: 0; margin: auto` — it centres the box in the viewport and gives it a border — so
+ * those have to be reset before the panel can be put under the bar.
+ *
+ * `100dvh` follows the second declaration because a phone's `100vh` includes the chrome the
+ * browser retracts; the first is what a browser that does not know `dvh` keeps.
+ */
+.vp-blog-ui-toc-panel {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  top: var(--vp-blog-toc-bar-height);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(
+    calc(100% - 2 * var(--vp-blog-layout-gutter)),
+    var(--vp-blog-layout-measure)
+  );
+  max-height: calc(100vh - var(--vp-blog-toc-bar-height) - 1rem);
+  max-height: calc(100dvh - var(--vp-blog-toc-bar-height) - 1rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 1rem 1rem;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 0.5rem;
+  background-color: var(--vp-c-bg-soft);
+  box-shadow: var(--vp-shadow-3);
+}
+
+.vp-blog-ui-toc-top {
+  display: block;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--vp-c-divider);
+  font-size: 0.875rem;
   font-weight: 500;
-  color: var(--vp-c-text-1);
-  cursor: pointer;
+  color: var(--vp-blog-link, var(--vp-c-brand-1));
+  text-decoration: none;
+}
+
+.vp-blog-ui-toc-panel nav {
+  padding-top: 0.5rem;
+}
+
+/* Chrome for a reader scrolling a screen: on paper it would repeat on every page. */
+@media print {
+  .vp-blog-ui-toc-bar {
+    display: none;
+  }
 }
 
 @media (min-width: 1280px) {
@@ -818,12 +948,14 @@
        above and the TOC is its content's height. */
     align-self: start;
     position: sticky;
-    /* Nothing above it is fixed — the Theme's nav scrolls away with the page — so this is
-       breathing room rather than the height of a bar. */
+    /* Unlike the narrow bar, this one sits in the column and the nav above it scrolls away
+       with the page, so the offset is breathing room rather than the height of a bar. */
     top: 1.5rem;
   }
 
-  .vp-blog-ui-toc-disclosure {
+  /* Unreachable — the trigger that opens it is hidden — but a reader who opens the panel
+     below 1280px and then widens the window would otherwise keep it over the column. */
+  .vp-blog-ui-toc-panel {
     display: none;
   }
 
@@ -1258,7 +1390,8 @@
 .dark .vp-blog-ui-byline,
 .dark .vp-blog-content-post-nav-block,
 .dark .vp-blog-ui-toc-nav,
-.dark .vp-blog-ui-toc-disclosure,
+.dark .vp-blog-ui-toc-bar,
+.dark .vp-blog-ui-toc-panel,
 .dark .vp-blog-layout-footer {
   border-color: color-mix(in srgb, var(--vp-c-divider) 45%, transparent);
 }

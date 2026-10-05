@@ -28,9 +28,11 @@
  * `vp-doc.css` expects the element carrying `vp-doc` to sit inside the default theme's
  * `.Layout`, and a few of its variables (`--vp-layout-top-height`,
  * `--vp-extra-scroll-margin`) are declared there rather than in `vars.css`. In this
- * Theme they fall back to the values baked into their `var(..., default)` uses, so what
- * is lost is the scroll offset that compensates for a fixed navbar — this Theme serves
- * an inline navbar instead.
+ * Theme they fall back to the values baked into their `var(..., default)` uses. That
+ * costs nothing here: the offset those variables exist to add is for a fixed navbar, and
+ * this Theme's site nav scrolls away with the page. It is also why the narrow TOC's bar is
+ * built to the 47px `vp-doc.css` already assumes, rather than carrying an offset of its own
+ * — see `.agents/adr/0014-the-narrow-toc-is-a-native-popover.md`.
  */
 
 @import 'vitepress/dist/client/theme-default/styles/vars.css';

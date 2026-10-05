@@ -579,10 +579,13 @@ check(
 // stylesheet: hoisting its `const` above these checks would only couple the two sections.
 const tocCss = readAll(path.join(dist, 'assets'), '.css')
 check(
-  'ships the TOC styles, with the column’s copy sticky and the other hidden there',
+  'ships the TOC styles: the column’s copy sticky, the narrow bar fixed, and one rendering hidden at each width',
   /\.vp-blog-ui-toc\{[^}]*position:sticky/.test(tocCss) &&
-    /\.vp-blog-ui-toc-nav\{display:none\}/.test(tocCss) &&
-    /\.vp-blog-ui-toc-disclosure\{display:none\}/.test(tocCss)
+    /\.vp-blog-ui-toc-nav[^{}]*\{display:none\}/.test(tocCss) &&
+    /\.vp-blog-ui-toc-bar[^{}]*\{[^}]*position:fixed/.test(tocCss) &&
+    /\.vp-blog-ui-toc-bar[^{}]*\{display:none\}/.test(tocCss) &&
+    /\.vp-blog-ui-toc-panel\{[^}]*position:fixed/.test(tocCss) &&
+    /\.vp-blog-ui-toc-panel\{display:none\}/.test(tocCss)
 )
 
 section('Shell')
@@ -892,8 +895,15 @@ check(
 // it is ordinary cascade. The rest are read through a `var()` fallback and never declared,
 // which is what lets a Site set them before the stylesheet loads; declaring one by reflex
 // would silently break that, and nothing else would notice.
+//
+// What counts as declared is what `:root` declares. A custom property on a component's own
+// class is internal — the narrow TOC bar's height is one, and it exists so the bar and the
+// `scroll-margin-top` arithmetic that assumes its height cannot drift apart. Reading the whole
+// stylesheet instead would make every such variable look like part of this contract.
 const interfaceDeclared = new Set(
-  [...css.matchAll(/(--vp-blog-[a-z-]+)\s*:/g)].map((match) => match[1])
+  [...css.matchAll(/:root\s*\{([^}]*)\}/g)].flatMap((block) =>
+    [...block[1].matchAll(/(--vp-blog-[a-z-]+)\s*:/g)].map((match) => match[1])
+  )
 )
 const interfaceReadWithFallback = new Set(
   [...css.matchAll(/var\(\s*(--vp-blog-[a-z-]+)\s*,/g)].map((match) => match[1])

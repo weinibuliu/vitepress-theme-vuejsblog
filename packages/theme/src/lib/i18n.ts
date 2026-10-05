@@ -44,6 +44,11 @@ export interface LangStrings {
    */
   tocTitle: string
   /**
+   * The first thing in the narrow TOC panel: the reader's way back to the top of the Post.
+   * A label rather than an instruction, because what it names is where the link goes.
+   */
+  returnToTop: string
+  /**
    * A pinned Post's accessible name — the badge beside its title. A screen reader hears
    * this where a sighted reader sees the pin.
    */
@@ -75,6 +80,7 @@ const en: LangStrings = {
   mail: 'Email',
   published: 'Published on',
   tocTitle: 'On this page',
+  returnToTop: 'Return to top',
   pinned: 'Pinned',
   tabsLabel: 'Tabs',
   empty: 'No posts yet. Add Markdown files under your Collection Scope.'
@@ -97,6 +103,7 @@ const zhCN: LangStrings = {
   mail: '邮箱',
   published: '发布于',
   tocTitle: '本页目录',
+  returnToTop: '返回顶部',
   pinned: '置顶',
   tabsLabel: '选项卡',
   empty: '暂无文章。请在你的 Collection Scope 下添加 Markdown 文件。'
