@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import { useData, useRoute, withBase } from 'vitepress'
 
-import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
 import { requestedLocation } from '../lib/url.js'
 

@@ -5,7 +5,6 @@ import { useData } from 'vitepress'
 import type { Post } from '../lib/types.js'
 import type { LangStrings } from '../lib/i18n.js'
 import { useLang } from '../lib/i18n.js'
-import { useBlogConfig } from '../lib/useBlogConfig.js'
 
 /**
  * A Post's publication date.
@@ -29,7 +28,6 @@ const props = defineProps<{
   strings?: Pick<LangStrings, 'published'>
 }>()
 
-const blog = useBlogConfig()
 const { site } = useData()
 
 const strings = computed(() => props.strings ?? useLang(site.value.lang))

@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import { useData } from 'vitepress'
 
-import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
 
 /**
@@ -16,7 +15,6 @@ import { useLang } from '../lib/i18n.js'
  * "pinned" is what carries the meaning, so the title is announced as "Pinned, Hello world"
  * rather than preceded by an unnamed graphic.
  */
-const blog = useBlogConfig()
 const { site } = useData()
 
 const strings = computed(() => useLang(site.value.lang))

@@ -7,7 +7,6 @@ import type { LangStrings } from '../lib/i18n.js'
 import { useLang } from '../lib/i18n.js'
 import type { ResolvedSocial } from '../lib/types.js'
 import { socialAriaLabel, socialCaption } from '../lib/author.js'
-import { useBlogConfig } from '../lib/useBlogConfig.js'
 
 /**
  * An Author's Social Links, as a row of icons.
@@ -32,7 +31,6 @@ const props = withDefaults(
   { socials: () => [] }
 )
 
-const blog = useBlogConfig()
 const { site } = useData()
 
 const strings = computed(() => props.strings ?? useLang(site.value.lang))

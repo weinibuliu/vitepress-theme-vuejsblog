@@ -6,7 +6,6 @@ import BlogSocialLinks from './BlogSocialLinks.vue'
 import type { ResolvedAuthor } from '../lib/types.js'
 import type { LangStrings } from '../lib/i18n.js'
 import { useLang } from '../lib/i18n.js'
-import { useBlogConfig } from '../lib/useBlogConfig.js'
 
 /**
  * The byline for a Post.
@@ -36,7 +35,6 @@ const props = defineProps<{
   strings?: LangStrings
 }>()
 
-const blog = useBlogConfig()
 const { site } = useData()
 
 const strings = computed(() => props.strings ?? useLang(site.value.lang))
