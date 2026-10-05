@@ -154,6 +154,22 @@ export default defineConfig<ThemeConfig>({
 })
 ```
 
+## 网站语言
+
+```ts
+// .vitepress/config.ts
+
+export default defineConfig<ThemeConfig>({
+  // ...
+  themeConfig: {
+    lang: 'zh-CN' // 网站语言
+    blog: {
+      locale: 'en-US' // 日期渲染格式
+    }
+  }
+})
+```
+
 ## 文章位置
 
 默认情况下，主题将会读取 `posts/` 目录下所有 `*.md` 文件。
@@ -201,7 +217,7 @@ export default defineConfig<ThemeConfig>({
 
 ## TOC
 
-默认情况下，主题会为所有文章生成 TOC 侧栏，可以通过 `themeConfig.blog.toc: false` 禁用。
+主题默认会为所有文章生成 TOC 侧栏，可以通过 `themeConfig.blog.toc: false` 禁用。
 
 ```ts
 // .vitepress/config.ts
@@ -225,6 +241,18 @@ export default defineConfig<ThemeConfig>({
 toc: true
 ---
 ```
+
+## 置顶文章
+
+```md
+---
+pin: true
+---
+```
+
+在 `frontmatter` 中使用 `pin` 字段来置顶文章。支持传入 `number | true`。传入 `true` 时，相当于 `pin: 0`。存在多个置顶文章时，优先级将按 `pin: {number}` 升序排列。
+
+如果多个文章使用相同的优先级，构建时将会报错。请为每篇文章分配不同的优先级。
 
 ## 博客作者
 
