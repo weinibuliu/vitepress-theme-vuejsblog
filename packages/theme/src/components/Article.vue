@@ -108,11 +108,6 @@ const updated = computed(() => {
             prevPost.title
           }}</a>
         </div>
-        <div class="vp-blog-content-post-nav-block">
-          <a class="vp-blog-link" :href="withBase('/')">{{
-            strings.backToBlog
-          }}</a>
-        </div>
       </footer>
 
       <!-- After the navigation rather than before it: the frame's left column is a reading

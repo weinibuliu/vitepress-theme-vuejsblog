@@ -7,7 +7,6 @@
 export interface LangStrings {
   nextArticle: string
   previousArticle: string
-  backToBlog: string
   readMore: string
   updated: string
   notFound: string
@@ -61,7 +60,6 @@ export interface LangStrings {
 const en: LangStrings = {
   nextArticle: 'Next Article',
   previousArticle: 'Previous Article',
-  backToBlog: 'Back to the blog',
   readMore: 'Read more',
   updated: 'Updated',
   notFound: 'Page Not Found',
@@ -85,7 +83,6 @@ const en: LangStrings = {
 const zhCN: LangStrings = {
   nextArticle: '下一篇',
   previousArticle: '上一篇',
-  backToBlog: '返回博客',
   readMore: '阅读全文',
   updated: '更新于',
   notFound: '页面不存在',
@@ -111,7 +108,7 @@ const tables: Record<string, LangStrings> = {
 }
 
 /**
- * The string table for a language tag, falling back to English.
+ * The string table for a language tag, fallback to English.
  *
  * Matching is on the primary subtag, so `zh`, `zh-CN` and `zh-Hans` all resolve to the
  * same table, and an unknown tag resolves to English rather than to nothing.
