@@ -145,7 +145,7 @@ export default defineConfig<ThemeConfig>({
       hero: {
         title: 'Vitepress Theme Vuejs Blog',
         avatar: false,
-        // subText 支持 html 渲染
+        // subtext 支持 HTML
         subtext:
           "This is not the official <a href='https://vuejs.org'>Vue.js</a> website. We just cite <a href='https://blog.vuejs.org'>blogs</a> to verify rendering."
       }
@@ -253,6 +253,10 @@ pin: true
 在 `frontmatter` 中使用 `pin` 字段来置顶文章。支持传入 `number | true`。传入 `true` 时，相当于 `pin: 0`。存在多个置顶文章时，优先级将按 `pin: {number}` 升序排列。
 
 如果多个文章使用相同的优先级，构建时将会报错。请为每篇文章分配不同的优先级。
+
+## 隐藏/排除文章
+
+见 [Not Ready for Production?](./not-ready-for-production.md) 。
 
 ## 博客作者
 
