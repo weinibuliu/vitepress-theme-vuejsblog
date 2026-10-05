@@ -118,15 +118,11 @@ const hasFooter = computed(
                   : undefined
               "
             >
-              <svg
+              <span
+                class="vp-blog-layout-nav-icon"
                 v-if="item.icon"
-                viewBox="0 0 24 24"
-                width="24"
-                height="24"
-                :title="item.text ? item.text : item.link"
-              >
-                <path fill="currentColor" :d="item.icon" />
-              </svg>
+                v-html="item.icon"
+              ></span>
               <template v-else>{{ item.text }}</template></a
             >
           </template>

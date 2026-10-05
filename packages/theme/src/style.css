@@ -229,6 +229,17 @@
   color: var(--vp-c-text-1);
 }
 
+.vp-blog-layout-nav-icon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+
+.vp-blog-layout-nav-icon > svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
 /* -------------------------------------------------------------- home / list */
 
 .vp-blog-content-index-head {
