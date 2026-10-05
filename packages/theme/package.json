@@ -24,7 +24,8 @@
     "config.js",
     "config.d.ts",
     "posts.data.ts",
-    "LICENSE"
+    "LICENSE",
+    "README.md"
   ],
   "type": "module",
   "exports": {
@@ -44,6 +45,7 @@
     "./presets/*.css": "./presets/*.css"
   },
   "scripts": {
+    "prepack": "cp ../../README.md ./README.md",
     "clean": "node scripts/clean.mjs",
     "build": "pnpm clean && tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
     "typecheck": "tsc -p tsconfig.json"

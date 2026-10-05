@@ -5,9 +5,7 @@
 
 一个基于 [blog.vuejs.org](https://blog.vuejs.org) 风格的 Vitepress 主题。
 
-[Demo](https://weinibuliu.github.io/vitepress-theme-vuejsblog)
-
-[使用引导](https://weinibuliu.github.io/vitepress-theme-vuejsblog/docs/zh-cn/welcome)
+[Demo](https://weinibuliu.github.io/vitepress-theme-vuejsblog) | [使用引导](https://weinibuliu.github.io/vitepress-theme-vuejsblog/docs/zh-cn/welcome)
 
 ## 快速开始
 
