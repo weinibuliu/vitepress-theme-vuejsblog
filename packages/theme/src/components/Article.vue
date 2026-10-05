@@ -91,8 +91,31 @@ const updated = computed(() => {
 
     <div class="vp-blog-content-post-frame">
       <BlogAuthor v-if="authors.length" :authors="authors" />
+
+      <!-- The TOC is the Post's reading aid, so on a narrow screen it opens above the body
+           it indexes. From 1280px up the frame's grid lifts it into the left column's last
+           row instead. -->
+      <BlogToc />
+
+      <div class="vp-blog-content-post-main">
+        <slot name="content-post-main-before" />
+        <Content class="vp-doc vp-blog-prose" />
+        <slot name="content-post-main-after" />
+      </div>
+
+      <!-- Last in the frame, because below 1280px this is where the reader leaves the Post:
+           after its body. The frame's grid is what puts the same footer back into the left
+           column from 1280px up, between the byline and the TOC, where the document order
+           and the column order no longer agree — the grid's explicit rows are what place
+           it. The blocks inside keep their own order — next first — which is the order that
+           column stacks them in; below 1280px they sit in a row in which Next has to be the
+           right-hand half, and `style.css` sends it there with `order` rather than this file
+           reordering its children. -->
       <footer class="vp-blog-content-post-nav">
-        <div v-if="nextPost" class="vp-blog-content-post-nav-block">
+        <div
+          v-if="nextPost"
+          class="vp-blog-content-post-nav-block vp-blog-content-post-nav-block-next"
+        >
           <h2 class="vp-blog-content-post-nav-title">
             {{ strings.nextArticle }}
           </h2>
@@ -100,7 +123,10 @@ const updated = computed(() => {
             nextPost.title
           }}</a>
         </div>
-        <div v-if="prevPost" class="vp-blog-content-post-nav-block">
+        <div
+          v-if="prevPost"
+          class="vp-blog-content-post-nav-block vp-blog-content-post-nav-block-prev"
+        >
           <h2 class="vp-blog-content-post-nav-title">
             {{ strings.previousArticle }}
           </h2>
@@ -109,18 +135,6 @@ const updated = computed(() => {
           }}</a>
         </div>
       </footer>
-
-      <!-- After the navigation rather than before it: the frame's left column is a reading
-           aid from top to bottom, and where the reader may go next is part of leaving the
-           Post while the TOC is part of reading it. Both are the Post's own chrome; the
-           order is what a reader meets them in. -->
-      <BlogToc />
-
-      <div class="vp-blog-content-post-main">
-        <slot name="content-post-main-before" />
-        <Content class="vp-doc vp-blog-prose" />
-        <slot name="content-post-main-after" />
-      </div>
     </div>
 
     <slot name="content-post-after" />

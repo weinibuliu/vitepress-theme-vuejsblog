@@ -689,25 +689,80 @@
   white-space: nowrap;
 }
 
+/**
+ * The Next/Previous links are a pair of cards in a row below 1280px, after VitePress's own
+ * pager: Previous on the left, Next on the right, the two directions out of a Post that a
+ * narrow screen can still show side by side. A card takes half the row, gap included, so a
+ * long title wraps inside its own card and a Post with only one neighbour keeps that one
+ * card's width — the card does not stretch across the row for want of a partner, and Next
+ * stays on the right either way.
+ *
+ * The row carries no rule between its halves. A divider there belongs to the stacked
+ * rendering — it separates the two blocks when one sits above the other — and drawn
+ * vertically between two side-by-side cards it reads as an edge of a column that is not
+ * there. So the rule arrives with the stack at 1280px and the cards are spaced by the row's
+ * `gap` alone.
+ *
+ * The space above and below is the cards' own margin, not the row's padding: a Post with no
+ * published neighbours leaves the footer empty, and an empty element with no padding is the
+ * only kind that takes up no room. A card's padding is then free to be the card's, and only
+ * the stack below needs it — the block's `border-top` has to sit 2rem clear of its title.
+ *
+ * From 1280px up none of the row applies: the frame puts the same markup in its left column,
+ * where the blocks stack and take their padding back. `.vp-blog-content-post-nav-block-next`
+ * and `-prev` exist only so the row can be ordered and aligned; the document keeps Next
+ * first, which is the order the column reads in.
+ */
 .vp-blog-content-post-nav {
+  display: flex;
+  gap: 1rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
 }
 
+.vp-blog-content-post-nav-block {
+  flex: 0 1 calc(50% - 0.5rem);
+  /* A flex item will not shrink below its content unless it is allowed to, and a long title
+     is what has to be allowed to wrap. */
+  min-width: 0;
+  margin: 2rem 0;
+  padding: 0.75rem 1rem 0.875rem;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+}
+
+.vp-blog-content-post-nav-block-prev {
+  order: 1;
+}
+
+.vp-blog-content-post-nav-block-next {
+  order: 2;
+  /* Half a row, not a share of the leftover: with no Previous beside it, a lone Next is held
+     against the right edge rather than growing to fill what the missing card left. */
+  margin-left: auto;
+  text-align: right;
+}
+
 @media (min-width: 1280px) {
   .vp-blog-content-post-nav {
+    display: block;
     grid-column-start: 1;
     grid-row-start: 2;
   }
-}
 
-.vp-blog-content-post-nav-block {
-  padding: 2rem 0;
-}
+  .vp-blog-content-post-nav-block {
+    flex: none;
+    margin: 0;
+    padding: 2rem 0;
+    border: 0;
+    border-radius: 0;
+    text-align: left;
+  }
 
-.vp-blog-content-post-nav-block + .vp-blog-content-post-nav-block {
-  border-top: 1px solid var(--vp-c-divider);
+  .vp-blog-content-post-nav-block + .vp-blog-content-post-nav-block {
+    border-top: 1px solid var(--vp-c-divider);
+  }
 }
 
 .vp-blog-content-post-nav-title {
@@ -1192,11 +1247,16 @@
  * only thins it. The override is scoped to the chrome's own rules rather than to the token,
  * because tables and blockquotes read the token and their borders have to stay legible.
  * Light mode needs no help: there `--vp-c-divider` is already the reference's weight.
+ *
+ * The Next/Previous blocks are named as a set rather than as the second of a pair: below
+ * 1280px both are cards and every edge of either is a chrome divider, while from 1280px up
+ * only the block after the first is drawn at all — so the one declaration thins exactly the
+ * edges the narrow row and the wide column each show.
  */
 .dark .vp-blog-content-list,
 .dark .vp-blog-content-list-item,
 .dark .vp-blog-ui-byline,
-.dark .vp-blog-content-post-nav-block + .vp-blog-content-post-nav-block,
+.dark .vp-blog-content-post-nav-block,
 .dark .vp-blog-ui-toc-nav,
 .dark .vp-blog-ui-toc-disclosure,
 .dark .vp-blog-layout-footer {

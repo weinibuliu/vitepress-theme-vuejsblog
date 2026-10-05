@@ -30,12 +30,8 @@ import { BlogAuthor } from "vitepress-theme-vuejsblog"
 
 <!-- more -->
 
----
-
 > [!TIP]
 > `vitepress-theme-vuejsblog` 的外观灵感来自于 <https://blog.vuejs.org> ，其源码位于 [Github](https://github.com/vuejs/blog)
-
-[[TOC]]
 
 ---
 
