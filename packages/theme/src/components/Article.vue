@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useData, withBase } from 'vitepress'
 
+import { resolvePostAuthors } from '../lib/author.js'
 import { data as posts } from '../../posts.data.js'
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { useLang } from '../lib/i18n.js'
@@ -43,6 +44,12 @@ function normalise(value: string): string {
   return value.replace(/^\/+/, '').replace(/\.md$/, '').replace(/\/+$/, '')
 }
 
+const authors = computed(
+  () =>
+    post.value?.authors ??
+    resolvePostAuthors(frontmatter.value, page.value.relativePath, blog.value)
+)
+
 /**
  * `next` is the key-greater neighbour — the newer Post under `date` — whichever way the Blog's
  * index happens to run, which is what the reference site's labels mean.
@@ -83,7 +90,7 @@ const updated = computed(() => {
     </header>
 
     <div class="vp-blog-content-post-frame">
-      <BlogAuthor v-if="post" :authors="post.authors" />
+      <BlogAuthor v-if="authors.length" :authors="authors" />
       <footer class="vp-blog-content-post-nav">
         <div v-if="nextPost" class="vp-blog-content-post-nav-block">
           <h2 class="vp-blog-content-post-nav-title">

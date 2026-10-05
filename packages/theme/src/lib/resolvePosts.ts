@@ -1,21 +1,23 @@
 import { type ContentData } from 'vitepress'
+
 import {
   formatDate,
   parseDate,
   toISODate,
   DEFAULT_DATE_FORMAT
 } from './date.js'
-import { resolveAuthors, matchAuthorScope } from './author.js'
+import {
+  resolveAuthors,
+  authorFromFrontmatter,
+  matchAuthorScope
+} from './author.js'
 import { isExcluded } from './exclude.js'
 import { anchorExcerptLinks } from './excerpt.js'
 import type {
-  Author,
-  CustomSocial,
   Post,
   PriorityConflict,
   ResolvePostsResult,
   SkippedPost,
-  SocialValue,
   SortDirection,
   SortMode,
   ResolvedBlogConfig
@@ -360,113 +362,4 @@ function contentPathOf(entry: ContentData, srcDir: string | undefined): string {
     if (src.startsWith(dir + '/')) return src.slice(dir.length + 1)
   }
   return entry.url.replace(/^\//, '')
-}
-
-/**
- * Read the Author a Post credits.
- *
- * Two spellings are accepted, because the reference site uses the flat one and
- * VitePress documents the nested one:
- *
- * ```yaml
- * # flat — one author, with the identity fields as siblings
- * author: Evan You
- * gravatar: eca93da2c67aadafe35d477aa8f454b8
- * twitter: '@youyuxi'
- * github: https://github.com/yyx990803
- * ```
- *
- * ```yaml
- * # nested — preferred for a new Blog, and the only way to credit several Authors
- * author:
- *   name: Evan You
- *   gravatar: eca93da2c67aadafe35d477aa8f454b8
- *   twitter: '@youyuxi'
- * ```
- *
- * The sibling fields only apply when `author` is a bare name; once an Author is
- * written as an object, its own fields are authoritative.
- *
- * Every Social Link has a sibling of its own, so the flat form is not a second-class
- * one. They are the same fields the nested form takes, with the same meaning — including
- * `x` beating `twitter`, and `mail` accepting a bare address.
- */
-function authorFromFrontmatter(
-  frontmatter: Record<string, unknown>
-): Author | Author[] | undefined {
-  const authored = frontmatter.author as Author | Author[] | undefined
-  if (typeof authored !== 'string') return authored
-
-  const gravatar = asString(frontmatter.gravatar)
-  const avatar = asString(frontmatter.avatar)
-  const twitter = asString(frontmatter.twitter)
-  const url = asString(frontmatter.authorUrl)
-  const x = asSocialValue(frontmatter.x)
-  const github = asSocialValue(frontmatter.github)
-  const facebook = asSocialValue(frontmatter.facebook)
-  const instagram = asSocialValue(frontmatter.instagram)
-  const mail = asSocialValue(frontmatter.mail)
-  const customSocial = asCustomSocial(frontmatter.customSocial)
-
-  if (
-    !gravatar &&
-    !avatar &&
-    !twitter &&
-    !url &&
-    !x &&
-    !github &&
-    !facebook &&
-    !instagram &&
-    !mail &&
-    !customSocial
-  ) {
-    return authored
-  }
-
-  return {
-    name: authored,
-    ...(avatar ? { avatar } : {}),
-    ...(gravatar ? { gravatar } : {}),
-    ...(url ? { url } : {}),
-    ...(twitter ? { twitter } : {}),
-    ...(x ? { x } : {}),
-    ...(github ? { github } : {}),
-    ...(facebook ? { facebook } : {}),
-    ...(instagram ? { instagram } : {}),
-    ...(mail ? { mail } : {}),
-    ...(customSocial ? { customSocial } : {})
-  }
-}
-
-/**
- * A Social Link written as a frontmatter sibling: either the shorthand string or the
- * mapping form `{ url, label }`, which YAML reads as an object.
- */
-function asSocialValue(value: unknown): SocialValue | undefined {
-  if (typeof value === 'string') return asString(value)
-  if (!value || typeof value !== 'object') return undefined
-  const { url, label } = value as { url?: unknown; label?: unknown }
-  const link = asString(url)
-  if (!link) return undefined
-  const name = asString(label)
-  return name ? { url: link, label: name } : { url: link }
-}
-
-/**
- * `customSocial` written as a frontmatter sibling: one Custom Social Link, or a list of them.
- *
- * Nothing is validated here beyond the shape of the container. The fields inside are the
- * Author's own, and `resolveAuthor` is what reads them.
- */
-function asCustomSocial(
-  value: unknown
-): CustomSocial | CustomSocial[] | undefined {
-  if (!value || typeof value !== 'object') return undefined
-  if (Array.isArray(value))
-    return value.length ? (value as CustomSocial[]) : undefined
-  return value as CustomSocial
-}
-
-function asString(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }

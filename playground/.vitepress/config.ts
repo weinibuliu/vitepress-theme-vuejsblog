@@ -53,7 +53,10 @@ export default defineConfig<ThemeConfig>({
           name: 'WEINIBULIU',
           gravatar:
             '2b9643e3e2b5062b1bf581ed52213805389cbd628f87967816dd6a8d3c0bf951',
-          github: 'https://github.com/weinibuliu'
+          github: 'https://github.com/weinibuliu',
+          x: 'https://x.com/example',
+          facebook: 'https://facebook.com/example',
+          instagram: 'https://instagram.com/example'
         }
       },
       logo: '/logo.svg',
