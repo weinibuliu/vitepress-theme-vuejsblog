@@ -54,7 +54,7 @@ const requested = computed(() => requestedLocation(route))
 
       <p class="vp-blog-content-not-found-action">
         <a class="vp-blog-link" :href="withBase('/')">{{
-          strings.backToBlog
+          strings.backToIndex
         }}</a>
       </p>
     </slot>

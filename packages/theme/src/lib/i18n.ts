@@ -7,6 +7,7 @@
 export interface LangStrings {
   nextArticle: string
   previousArticle: string
+  backToIndex: string
   readMore: string
   updated: string
   notFound: string
@@ -65,6 +66,7 @@ export interface LangStrings {
 const en: LangStrings = {
   nextArticle: 'Next Article',
   previousArticle: 'Previous Article',
+  backToIndex: 'Back to the blog',
   readMore: 'Read more',
   updated: 'Updated',
   notFound: 'Page Not Found',
@@ -89,6 +91,7 @@ const en: LangStrings = {
 const zhCN: LangStrings = {
   nextArticle: '下一篇',
   previousArticle: '上一篇',
+  backToIndex: '返回首页',
   readMore: '阅读全文',
   updated: '更新于',
   notFound: '页面不存在',
