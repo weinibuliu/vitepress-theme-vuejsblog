@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue'
 import { useData, withBase } from 'vitepress'
+
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { CHILD_SLOTS, filledSlots } from '../lib/slots.js'
+import { isExternal } from '../lib/externalLinks.js'
 import Home from '../components/Home.vue'
 import Article from '../components/Article.vue'
 import BlogDoc from '../components/BlogDoc.vue'
@@ -43,12 +45,21 @@ const notFoundSlots = computed(() => filledSlots(slots, CHILD_SLOTS.notFound))
 const homeSlots = computed(() => filledSlots(slots, CHILD_SLOTS.home))
 const articleSlots = computed(() => filledSlots(slots, CHILD_SLOTS.article))
 
-function isExternal(link: string): boolean {
-  return /^https?:\/\//i.test(link) || link.startsWith('mailto:')
-}
-
 const title = computed(() => site.value.title)
 const logo = computed(() => blog.value.logo)
+
+const nav = computed(() =>
+  blog.value.nav.map((item) => ({
+    ...item,
+    isExternal: item.external ?? isExternal(item.link)
+  }))
+)
+const footerLinks = computed(() =>
+  blog.value.footer.links.map((item) => ({
+    ...item,
+    isExternal: item.external ?? isExternal(item.link)
+  }))
+)
 
 /**
  * Whether the footer renders at all.
@@ -98,7 +109,7 @@ const hasFooter = computed(
         </a>
 
         <div class="vp-blog-layout-nav-links">
-          <template v-for="(item, index) of blog.nav" :key="index">
+          <template v-for="(item, index) of nav" :key="index">
             <span
               v-if="index > 0"
               class="vp-blog-layout-nav-separator"
@@ -106,17 +117,17 @@ const hasFooter = computed(
             >
               {{ blog.navSeparator }}
             </span>
+            <!-- 排除 icon -->
             <a
               class="vp-blog-layout-nav-link"
-              :href="withBase(item.link)"
-              :target="
-                (item.external ?? isExternal(item.link)) ? '_blank' : undefined
-              "
-              :rel="
-                (item.external ?? isExternal(item.link))
-                  ? 'noopener noreferrer'
+              :class="
+                !item.icon && item.isExternal
+                  ? 'vp-blog-external-link'
                   : undefined
               "
+              :href="withBase(item.link)"
+              :target="item.isExternal ? '_blank' : undefined"
+              :rel="item.isExternal ? 'noopener noreferrer' : undefined"
             >
               <span
                 class="vp-blog-layout-nav-icon"
@@ -171,18 +182,13 @@ const hasFooter = computed(
           class="vp-blog-layout-footer-links"
         >
           <a
-            v-for="(item, index) of blog.footer.links"
+            v-for="(item, index) of footerLinks"
             :key="index"
             class="vp-blog-layout-footer-link"
+            :class="item.isExternal ? 'vp-blog-external-link' : undefined"
             :href="withBase(item.link)"
-            :target="
-              (item.external ?? isExternal(item.link)) ? '_blank' : undefined
-            "
-            :rel="
-              (item.external ?? isExternal(item.link))
-                ? 'noopener noreferrer'
-                : undefined
-            "
+            :target="item.isExternal ? '_blank' : undefined"
+            :rel="item.isExternal ? 'noopener noreferrer' : undefined"
             >{{ item.text }}</a
           >
         </div>

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useData } from 'vitepress'
 
 import BlogSocialLinks from './BlogSocialLinks.vue'
+import { isExternal } from '../lib/externalLinks.js'
 import type { ResolvedAuthor } from '../lib/types.js'
 import type { LangStrings } from '../lib/i18n.js'
 import { useLang } from '../lib/i18n.js'
@@ -38,10 +39,6 @@ const props = defineProps<{
 const { site } = useData()
 
 const strings = computed(() => props.strings ?? useLang(site.value.lang))
-
-function isExternal(url: string): boolean {
-  return /^https?:\/\//i.test(url)
-}
 </script>
 
 <template>
@@ -91,6 +88,9 @@ function isExternal(url: string): boolean {
                   :href="author.url"
                   :target="isExternal(author.url) ? '_blank' : undefined"
                   :rel="isExternal(author.url) ? 'noopener' : undefined"
+                  :class="
+                    isExternal(author.url) ? 'vp-blog-external-link' : undefined
+                  "
                   class="vp-blog-link"
                   >{{ author.name }}</a
                 >
