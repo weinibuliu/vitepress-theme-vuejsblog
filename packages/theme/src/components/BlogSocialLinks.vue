@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useData } from 'vitepress'
 
 import BlogSocialIcon from './BlogSocialIcon.vue'
+import { EXTERNAL_LINK_CLASS } from '../lib/externalLinks.js'
 import type { LangStrings } from '../lib/i18n.js'
 import { useLang } from '../lib/i18n.js'
 import type { ResolvedSocial } from '../lib/types.js'
@@ -50,6 +51,7 @@ const caption = computed(() => socialCaption(props.socials))
     >
       <a
         class="vp-blog-ui-social-link"
+        :class="social.external ? EXTERNAL_LINK_CLASS : undefined"
         :href="social.link"
         :target="social.external ? '_blank' : undefined"
         :rel="social.external ? 'noopener' : undefined"

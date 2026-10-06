@@ -207,28 +207,96 @@
   display: inline;
 }
 
-.vp-blog-external-link {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.15em;
+/**
+ * The arrow's glyph.
+ *
+ * VitePress ships the same mark as `--vp-icon-external-link`, but the version the Theme pins
+ * does not have it yet — its `icons.css` only gains that variable in a later checkout — so the
+ * Theme carries the asset itself and prefers VitePress's when it is there. Both directions are
+ * stated because with the variable absent nothing else would mirror the arrow for a
+ * right-to-left Site. The name is internal: it is an asset, not one of the Theme's public
+ * levers.
+ */
+:root {
+  --vp-blog-external-arrow: var(
+    --vp-icon-external-link,
+    url("data:image/svg+xml, %3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' %3E%3Cpath d='M0 0h24v24H0V0z' fill='none' /%3E%3Cpath d='M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5H9z' /%3E%3C/svg%3E")
+  );
 }
 
-.vp-blog-external-link::after {
-  content: '';
-  flex: none;
-  width: 0.6em;
-  height: 0.6em;
-  transform: translateY(-0.25em);
-  background-color: currentColor;
+[dir='rtl'] {
+  --vp-blog-external-arrow: var(
+    --vp-icon-external-link,
+    url("data:image/svg+xml, %3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' %3E%3Cpath d='M0 0h24v24H0V0z' fill='none' /%3E%3Cpath d='M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5H9z' transform='matrix(-1 0 0 1 24 0)' /%3E%3C/svg%3E")
+  );
+}
 
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7M9 7h8v8'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7M9 7h8v8'/%3E%3C/svg%3E");
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
+/**
+ * The Theme's external-link marking, in two parts.
+ *
+ * `vp-blog-external-link` is the public hook: every External Link carries it — the nav, the
+ * footer, a Post's Markdown, the byline and an Author's Social Links — whatever the arrow
+ * switches say. A Site catches a click on it to show a prompt of its own, "you are leaving
+ * this Site" and the like.
+ *
+ * The arrow is the Theme's decoration, so it is drawn only where the Theme renders a link as
+ * text, and the selectors below are that list of places. An icon link carries the class and no
+ * arrow: a glyph or an avatar is already the link's whole label, and a mark beside it reads as
+ * noise. A link that carries the class for its own reasons is left alone too — the class is the
+ * hook, not the mark.
+ *
+ * The Markdown entry needs the longer selector because VitePress's own `vp-doc.css` has an
+ * external-link rule written for its default theme. This Theme never adds the
+ * `external-link-icon-enabled` class that gives that rule a `content`, so it stays inert — but
+ * its selector outweighs a bare class, so the box is stated here at a weight it cannot beat.
+ * VitePress's `no-icon` opt-out and its image exclusion are kept, so a link a Post marked, or
+ * one that is itself an image, stays bare.
+ *
+ * The anchor keeps its own `display`: the arrow is a sibling box on the line rather than a flex
+ * item, so a long link in a Post still wraps. `color: inherit` is what keeps
+ * `background-color: currentColor` reading the link's own colour rather than VitePress's
+ * muted one, which its rule would otherwise put on the pseudo-element.
+ */
+.vp-blog-layout-nav-link.vp-blog-external-link:not(
+    :has(.vp-blog-layout-nav-icon)
+  )::after,
+.vp-blog-layout-footer-link.vp-blog-external-link::after,
+.vp-blog-ui-byline-name .vp-blog-external-link::after,
+.vp-doc a.vp-blog-external-link[href]:not(.no-icon):not(:has(img, svg))::after {
+  content: '';
+  display: inline-block;
+  inline-size: 0.6em;
+  block-size: 0.6em;
+  margin-inline-start: 0.2em;
+  padding-inline-start: 0;
+  vertical-align: 0.05em;
+  color: inherit;
+  background-color: currentColor;
+  opacity: 0.65;
+  font-size: inherit;
+  -webkit-mask: var(--vp-blog-external-arrow) center / contain no-repeat;
+  mask: var(--vp-blog-external-arrow) center / contain no-repeat;
+}
+
+/**
+ * The region switches, stated once on the shell by Layout.
+ *
+ * Two rules per region rather than one where the Markdown link is concerned: the second turns
+ * off what the longer selector above turned on. The class itself never comes off with them —
+ * a Site's redirect prompt must not go quiet because a region stopped drawing a decoration.
+ */
+.is-external-arrow-off-nav
+  .vp-blog-layout-nav-link.vp-blog-external-link::after,
+.is-external-arrow-off-footer
+  .vp-blog-layout-footer-link.vp-blog-external-link::after,
+.is-external-arrow-off-content
+  .vp-blog-layout-main
+  .vp-blog-external-link::after,
+.is-external-arrow-off-content
+  .vp-blog-layout-main
+  .vp-doc
+  a.vp-blog-external-link[href]::after {
+  content: none;
 }
 
 .vp-blog-layout-nav-links {

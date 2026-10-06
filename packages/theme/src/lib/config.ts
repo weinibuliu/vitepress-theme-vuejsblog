@@ -1,7 +1,9 @@
 import type {
   Author,
   BlogThemeConfig,
+  ExternalArrowOptions,
   ResolvedBlogConfig,
+  ResolvedExternalArrow,
   ResolvedSort,
   SortSetting
 } from './types.js'
@@ -53,6 +55,19 @@ const DEFAULT_EXCERPT_SEPARATOR = '<!-- more -->'
 const DEFAULT_TOC = true
 
 /**
+ * The External Arrow is drawn in every region unless a Site says otherwise.
+ *
+ * On rather than off, because the arrow is the one cue that a link leaves the Blog, and a
+ * Site that wants none says so once. The regions are independent: switching one off says
+ * nothing about the other two.
+ */
+const DEFAULT_EXTERNAL_ARROW: ResolvedExternalArrow = {
+  nav: true,
+  footer: true,
+  content: true
+}
+
+/**
  * Defaults are applied in one place rather than at every use site.
  *
  * `siteLang` is VitePress's own site-level `lang` — the one that sets `<html lang>`.
@@ -84,7 +99,33 @@ export function withDefaults(
     sort: readSort(blog?.sort),
     toc: blog?.toc ?? DEFAULT_TOC,
     excerptSeparator: readExcerptSeparator(blog?.excerptSeparator),
-    feed: blog?.feed
+    feed: blog?.feed,
+    externalArrow: readExternalArrow(blog?.externalArrow)
+  }
+}
+
+/**
+ * The External Arrow switches, read from either spelling.
+ *
+ * `false` is the whole answer written short — no arrow anywhere — and `true` is the default
+ * restated; the object is how a Site turns one region off without touching the others. A
+ * region the object does not name is on, the same tolerance `sort` reads a partial setting
+ * with, and the value is copied rather than handed out, so one caller cannot change the
+ * default for the next.
+ */
+function readExternalArrow(
+  setting: boolean | ExternalArrowOptions | undefined
+): ResolvedExternalArrow {
+  if (setting === false) {
+    return { nav: false, footer: false, content: false }
+  }
+  if (setting === true || setting === undefined) {
+    return { ...DEFAULT_EXTERNAL_ARROW }
+  }
+  return {
+    nav: setting.nav ?? DEFAULT_EXTERNAL_ARROW.nav,
+    footer: setting.footer ?? DEFAULT_EXTERNAL_ARROW.footer,
+    content: setting.content ?? DEFAULT_EXTERNAL_ARROW.content
   }
 }
 

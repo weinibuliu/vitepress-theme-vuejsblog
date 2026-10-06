@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useData } from 'vitepress'
 
 import BlogSocialLinks from './BlogSocialLinks.vue'
-import { isExternal } from '../lib/externalLinks.js'
+import { EXTERNAL_LINK_CLASS, isExternal } from '../lib/externalLinks.js'
 import type { ResolvedAuthor } from '../lib/types.js'
 import type { LangStrings } from '../lib/i18n.js'
 import { useLang } from '../lib/i18n.js'
@@ -55,6 +55,7 @@ const strings = computed(() => props.strings ?? useLang(site.value.lang))
             <a
               v-if="author.url"
               class="vp-blog-ui-byline-avatar-link"
+              :class="isExternal(author.url) ? EXTERNAL_LINK_CLASS : undefined"
               :href="author.url"
               :target="isExternal(author.url) ? '_blank' : undefined"
               :rel="isExternal(author.url) ? 'noopener' : undefined"
@@ -89,7 +90,7 @@ const strings = computed(() => props.strings ?? useLang(site.value.lang))
                   :target="isExternal(author.url) ? '_blank' : undefined"
                   :rel="isExternal(author.url) ? 'noopener' : undefined"
                   :class="
-                    isExternal(author.url) ? 'vp-blog-external-link' : undefined
+                    isExternal(author.url) ? EXTERNAL_LINK_CLASS : undefined
                   "
                   class="vp-blog-link"
                   >{{ author.name }}</a

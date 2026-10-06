@@ -4,7 +4,7 @@ import { useData, withBase } from 'vitepress'
 
 import { useBlogConfig } from '../lib/useBlogConfig.js'
 import { CHILD_SLOTS, filledSlots } from '../lib/slots.js'
-import { isExternal } from '../lib/externalLinks.js'
+import { EXTERNAL_LINK_CLASS, isExternal } from '../lib/externalLinks.js'
 import Home from '../components/Home.vue'
 import Article from '../components/Article.vue'
 import BlogDoc from '../components/BlogDoc.vue'
@@ -48,18 +48,45 @@ const articleSlots = computed(() => filledSlots(slots, CHILD_SLOTS.article))
 const title = computed(() => site.value.title)
 const logo = computed(() => blog.value.logo)
 
+/**
+ * A nav or footer entry, with the two questions about its link already answered.
+ *
+ * They are separate questions, and the `external` flag a Site may state answers only the
+ * second. `isExternal` is whether the link leaves the Site, by destination — what earns the
+ * hook class and the arrow. `opensNewTab` is whether the anchor should carry `target`, which
+ * a same-origin file needs too: VitePress's client router would take `/feed.rss` for a page
+ * route, so the Site marks it `external: true` to keep it out of the router, and an arrow on
+ * it would claim the reader is leaving the Blog when they are not.
+ */
 const nav = computed(() =>
   blog.value.nav.map((item) => ({
     ...item,
-    isExternal: item.external ?? isExternal(item.link)
+    isExternal: isExternal(item.link),
+    opensNewTab: item.external ?? isExternal(item.link)
   }))
 )
 const footerLinks = computed(() =>
   blog.value.footer.links.map((item) => ({
     ...item,
-    isExternal: item.external ?? isExternal(item.link)
+    isExternal: isExternal(item.link),
+    opensNewTab: item.external ?? isExternal(item.link)
   }))
 )
+
+/**
+ * The External Arrow's region switches, as one class each on the shell.
+ *
+ * Stated here rather than on every link, because the class that marks an External Link has to
+ * outlive the decoration: a Site's redirect prompt hangs off it, so a region that draws no
+ * arrow still carries the class. It is also the only way the content region can be switched
+ * at all — a Post's links are marked while VitePress builds the page, where Theme Config has
+ * not been resolved yet.
+ */
+const arrowSwitches = computed(() => ({
+  'is-external-arrow-off-nav': !blog.value.externalArrow.nav,
+  'is-external-arrow-off-footer': !blog.value.externalArrow.footer,
+  'is-external-arrow-off-content': !blog.value.externalArrow.content
+}))
 
 /**
  * Whether the footer renders at all.
@@ -80,7 +107,7 @@ const hasFooter = computed(
 <template>
   <div
     class="vp-blog-layout-shell"
-    :class="{ 'is-not-found': page.isNotFound }"
+    :class="[{ 'is-not-found': page.isNotFound }, arrowSwitches]"
   >
     <slot name="layout-top" />
 
@@ -117,25 +144,20 @@ const hasFooter = computed(
             >
               {{ blog.navSeparator }}
             </span>
-            <!-- 排除 icon -->
             <a
               class="vp-blog-layout-nav-link"
-              :class="
-                !item.icon && item.isExternal
-                  ? 'vp-blog-external-link'
-                  : undefined
-              "
+              :class="item.isExternal ? EXTERNAL_LINK_CLASS : undefined"
               :href="withBase(item.link)"
-              :target="item.isExternal ? '_blank' : undefined"
-              :rel="item.isExternal ? 'noopener noreferrer' : undefined"
+              :target="item.opensNewTab ? '_blank' : undefined"
+              :rel="item.opensNewTab ? 'noopener noreferrer' : undefined"
             >
               <span
                 class="vp-blog-layout-nav-icon"
                 v-if="item.icon"
                 v-html="item.icon"
               ></span>
-              <template v-else>{{ item.text }}</template></a
-            >
+              <template v-else>{{ item.text }}</template>
+            </a>
           </template>
         </div>
       </nav>
@@ -185,10 +207,10 @@ const hasFooter = computed(
             v-for="(item, index) of footerLinks"
             :key="index"
             class="vp-blog-layout-footer-link"
-            :class="item.isExternal ? 'vp-blog-external-link' : undefined"
+            :class="item.isExternal ? EXTERNAL_LINK_CLASS : undefined"
             :href="withBase(item.link)"
-            :target="item.isExternal ? '_blank' : undefined"
-            :rel="item.isExternal ? 'noopener noreferrer' : undefined"
+            :target="item.opensNewTab ? '_blank' : undefined"
+            :rel="item.opensNewTab ? 'noopener noreferrer' : undefined"
             >{{ item.text }}</a
           >
         </div>

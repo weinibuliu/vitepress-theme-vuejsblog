@@ -152,3 +152,59 @@ describe('withDefaults excerptSeparator', () => {
     ).toBe('\n---\n')
   })
 })
+
+describe('withDefaults externalArrow', () => {
+  it('draws the arrow in every region unless a Site says otherwise', () => {
+    // On rather than off: the arrow is what tells a reader a link leaves the Blog, and a Site
+    // that wants fewer says so once.
+    expect(withDefaults({ title: 'Blog' }).externalArrow).toEqual({
+      nav: true,
+      footer: true,
+      content: true
+    })
+  })
+
+  it('reads `false` as the whole answer written short', () => {
+    expect(
+      withDefaults({ title: 'Blog', externalArrow: false }).externalArrow
+    ).toEqual({
+      nav: false,
+      footer: false,
+      content: false
+    })
+  })
+
+  it('reads `true` as the default restated', () => {
+    expect(
+      withDefaults({ title: 'Blog', externalArrow: true }).externalArrow
+    ).toEqual({
+      nav: true,
+      footer: true,
+      content: true
+    })
+  })
+
+  it('switches one region off without touching the others', () => {
+    // The regions partition the page, so a Site that dislikes the arrow beside a nav entry
+    // should not have to give up the one in the prose as well.
+    expect(
+      withDefaults({ title: 'Blog', externalArrow: { nav: false } })
+        .externalArrow
+    ).toEqual({ nav: false, footer: true, content: true })
+  })
+
+  it('keeps a region a Site switched back on', () => {
+    expect(
+      withDefaults({
+        title: 'Blog',
+        externalArrow: { content: false, nav: true }
+      }).externalArrow
+    ).toEqual({ nav: true, footer: true, content: false })
+  })
+
+  it('hands out a copy, so one reader cannot change the next answer', () => {
+    const first = withDefaults({ title: 'Blog' }).externalArrow
+    first.nav = false
+    expect(withDefaults({ title: 'Blog' }).externalArrow.nav).toBe(true)
+  })
+})

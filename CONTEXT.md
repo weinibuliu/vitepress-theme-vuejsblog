@@ -96,6 +96,21 @@ _Avoid_: plugin, extension, option
 The RSS representation of a Site's Blog, generated at build time.
 _Avoid_: RSS, atom, syndication
 
+### Links
+
+**External Link**:
+A link whose destination is on another origin. The Theme marks every one with the same class,
+and opens it in a new tab. Whether a link is external is a question about its destination alone,
+never about the `external` flag a Site may put on a link in Theme Config — that flag only keeps
+the client router away from a same-origin file such as the Feed.
+_Avoid_: outbound link, external URL, outlink
+
+**External Arrow**:
+The small mark the Theme draws after a text External Link to say that following it leaves the
+Site. It is decoration: switching it off in a region leaves the link's External Link class in
+place, so a Site's own redirect prompt keeps working.
+_Avoid_: icon, badge, marker, external-link icon
+
 ### Writing a Post
 
 **Tab**:

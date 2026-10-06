@@ -441,6 +441,42 @@ export interface FooterConfig {
 }
 
 /**
+ * Which External Arrows the Theme draws, region by region.
+ *
+ * The arrow is the small mark after a text External Link, and this only ever turns that mark
+ * off. The `vp-blog-external-link` class, `target="_blank"` and the Theme's `rel` stay on the
+ * link either way: a Site's own "you are leaving this Site" prompt hangs off the class, and
+ * it must not go quiet because a region stopped drawing a decoration.
+ *
+ * Three regions partition the page. `content` is everything inside the Theme's main column —
+ * a Post's Markdown *and* its byline, including an Author's Social Links — so no link is left
+ * outside a switch.
+ *
+ * An icon link never draws the arrow whichever region it is in: a glyph or an avatar is
+ * already the link's own label, and a mark beside it reads as noise.
+ */
+export interface ExternalArrowOptions {
+  /**
+   * The nav row above a Post. An entry carrying an `icon` keeps the class but draws no arrow.
+   *
+   * @default true
+   */
+  nav?: boolean
+  /**
+   * The footer's row of links.
+   *
+   * @default true
+   */
+  footer?: boolean
+  /**
+   * The main column: a Post's Markdown and the byline above it.
+   *
+   * @default true
+   */
+  content?: boolean
+}
+
+/**
  * Feed generation settings.
  */
 export interface FeedOptions {
@@ -622,6 +658,24 @@ export interface BlogThemeConfig {
    * Feed settings, or `false` to generate no Feed.
    */
   feed?: FeedOptions | false
+
+  /**
+   * Whether the Theme draws its External Arrow — the small mark after a text External Link.
+   *
+   * On everywhere by default, because an arrow is the one cue that a reader is about to leave
+   * the Blog, and a Site only has to say so if it wants less. `true` (and saying nothing) draws
+   * it after a text link in the nav, in the footer and in the main column; `false` draws none
+   * anywhere; an object switches one region off without touching the others.
+   *
+   * This is a decoration, not the marking itself: every External Link carries
+   * `vp-blog-external-link` and `target="_blank"` whatever this says, so a Site's redirect
+   * prompt keeps working while a region shows no arrow. A link whose own content is an icon —
+   * a nav entry with an `icon`, an Author's avatar, a Social Link — carries the class but never
+   * draws the arrow.
+   *
+   * @default true
+   */
+  externalArrow?: boolean | ExternalArrowOptions
 }
 
 /**
@@ -646,6 +700,7 @@ export interface ResolvedBlogConfig extends BlogThemeConfig {
   sort: ResolvedSort
   toc: boolean
   footer: ResolvedFooterConfig
+  externalArrow: ResolvedExternalArrow
 }
 
 /**
@@ -654,4 +709,14 @@ export interface ResolvedBlogConfig extends BlogThemeConfig {
  */
 export interface ResolvedFooterConfig extends FooterConfig {
   links: FooterLink[]
+}
+
+/**
+ * The External Arrow switches with their defaults applied: every region is present, so a
+ * caller never has to read an absent key as "on".
+ */
+export interface ResolvedExternalArrow extends ExternalArrowOptions {
+  nav: boolean
+  footer: boolean
+  content: boolean
 }

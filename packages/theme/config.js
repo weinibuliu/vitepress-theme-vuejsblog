@@ -6,6 +6,7 @@ import {
 } from 'vitepress-plugin-group-icons'
 
 import { readThemeConfig } from './dist/lib/config.js'
+import { EXTERNAL_LINK_CLASS } from './dist/lib/externalLinks.js'
 import { faviconHead } from './dist/lib/favicon.js'
 import { scanExcluded } from './dist/lib/scanExcluded.js'
 import { tabsMarkdown } from './dist/lib/tabs.js'
@@ -114,11 +115,24 @@ export default function blogConfig(root) {
       },
 
       /*
-       * Mark `md-external` for all external links
+       * Put the Theme's hook class on every external link a Post writes.
+       *
+       * This is the one region the Theme cannot reach from its own templates, so the class is
+       * added here, while VitePress is building the page. It is the class alone: whether the
+       * arrow is drawn is Theme Config, which is not resolved yet when this file is read, so
+       * the arrow's region switches are stated in CSS instead (see the External Arrow section
+       * of `style.css`). The name comes from `lib/externalLinks.ts`, so this file and the
+       * templates cannot drift apart.
+       *
+       * VitePress only sets an attribute the link does not already carry, so a link written
+       * with a class of its own — `[x](https://x.com){.plain}` — keeps that one and does not
+       * get the hook. That is VitePress's rule, not the Theme's, and it is the one way an
+       * external link can end up unmarked.
        */
       externalLinks: {
         target: '_blank',
-        rel: 'noreferrer noopener md-external' // TODO: css for md-external
+        rel: 'noreferrer noopener',
+        class: EXTERNAL_LINK_CLASS
       }
     },
     lastUpdated: false,

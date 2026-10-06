@@ -31,7 +31,7 @@ import { BlogAuthor } from "vitepress-theme-vuejsblog"
 <!-- more -->
 
 > [!TIP]
-> `vitepress-theme-vuejsblog` 的外观灵感来自于 <https://blog.vuejs.org> ，其源码位于 [Github](https://github.com/vuejs/blog)
+> 主题外观灵感来自于 <https://blog.vuejs.org> ，其源码位于 [Github](https://github.com/vuejs/blog) 。
 
 ---
 
@@ -41,20 +41,16 @@ import { BlogAuthor } from "vitepress-theme-vuejsblog"
 
 > `--yes` 参数会为所有参数应用默认值。
 
-:::tabs
+:::code-group
 
-@tab pnpm
-
-```bash
+```bash [pnpm]
 pnpm create vitepress-theme-vuejsblog@latest my-blog --yes
 cd my-blog
 pnpm install
 pnpm dev
 ```
 
-@tab npm
-
-```bash
+```bash [npm]
 npm create vitepress-theme-vuejsblog@latest my-blog -- --yes
 cd my-blog
 npm install
@@ -201,6 +197,52 @@ export default defineConfig<ThemeConfig>({
     }
   }
 })
+```
+
+## 外链标记
+
+> [!TIP]
+>
+> - `footer.text` 与 `hero.subtext` 其中的外链不会被标记。如有需要，请自己添加类名。
+
+主题会自动为外链统一打上 `vp-blog-external-link` 类名，并在默认情况下显示小箭头。
+
+通过 `themeConfig.blog.externalArrow` 关闭箭头显示。
+
+```ts [.vitepress/config.ts]
+export default defineConfig<ThemeConfig>({
+  // ...
+  themeConfig: {
+    blog: {
+      externalArrow: true // 默认，三个区域都绘制
+      // externalArrow: false, // 全部关闭
+      // externalArrow: { nav: false, content: false }, // 只关闭部分区域
+    }
+  }
+})
+```
+
+### 处理外链跳转
+
+```ts [.vitepress/theme/index.ts]
+import Theme from 'vitepress-theme-vuejsblog'
+
+export default {
+  extends: Theme,
+  enhanceApp() {
+    if (import.meta.env.SSR) return
+
+    document.addEventListener('click', (event) => {
+      const target = event.target as Element | null
+      const link = target?.closest('a.vp-blog-external-link')
+      if (!link) return
+
+      const message = `你即将离开本站，前往 ${link.getAttribute('href')}`
+      if (window.confirm(message)) return
+      event.preventDefault()
+    })
+  }
+}
 ```
 
 ## TOC

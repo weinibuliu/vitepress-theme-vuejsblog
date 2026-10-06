@@ -918,11 +918,17 @@ check(
 // class is internal — the narrow TOC bar's height is one, and it exists so the bar and the
 // `scroll-margin-top` arithmetic that assumes its height cannot drift apart. Reading the whole
 // stylesheet instead would make every such variable look like part of this contract.
+//
+// One internal variable is global rather than component-scoped: the External Arrow's glyph
+// asset, which has to resolve inside the byline even when a Site renders that component on its
+// own, away from the shell. It is named here so it does not read as a ninth lever.
+const INTERNAL_VARIABLES = new Set(['--vp-blog-external-arrow'])
 const interfaceDeclared = new Set(
   [...css.matchAll(/:root\s*\{([^}]*)\}/g)].flatMap((block) =>
     [...block[1].matchAll(/(--vp-blog-[a-z-]+)\s*:/g)].map((match) => match[1])
   )
 )
+for (const name of INTERNAL_VARIABLES) interfaceDeclared.delete(name)
 const interfaceReadWithFallback = new Set(
   [...css.matchAll(/var\(\s*(--vp-blog-[a-z-]+)\s*,/g)].map((match) => match[1])
 )

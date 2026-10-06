@@ -1,3 +1,4 @@
+import { isExternal } from './externalLinks.js'
 import type { LangStrings } from './i18n.js'
 import { asString } from './utils.js'
 import type {
@@ -17,11 +18,6 @@ import type {
  * shorthand is ruled out.
  */
 type AuthorObject = Exclude<Author, string>
-
-/**
- * What counts as leaving the Site, which is what decides `target="_blank"`.
- */
-const EXTERNAL = /^https?:\/\//i
 
 /**
  * The one glyph the Theme draws itself.
@@ -167,7 +163,7 @@ function fromValue(
       text: readableLink(url),
       platform,
       icon: PLATFORM_ICONS[platform],
-      external: EXTERNAL.test(url)
+      external: isExternal(url)
     },
     label
   )
@@ -187,7 +183,7 @@ function fromMail(value: SocialValue): ResolvedSocial {
       text: readableLink(link),
       platform: 'mail',
       icon: PLATFORM_ICONS.mail,
-      external: EXTERNAL.test(link)
+      external: isExternal(link)
     },
     label
   )
@@ -203,7 +199,7 @@ function fromCustom(custom: CustomSocial): ResolvedSocial {
     text: custom.label,
     label: custom.label,
     icon,
-    external: EXTERNAL.test(custom.link)
+    external: isExternal(custom.link)
   }
 }
 
