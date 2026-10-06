@@ -553,10 +553,11 @@ export interface BlogThemeConfig {
   footer?: FooterConfig
 
   /**
-   * A BCP 47 language tag used for date formatting. Defaults to `lang`, so a Site that
-   * only wants its own language usually sets that one alone.
+   * A BCP 47 language tag used for date formatting. Defaults to VitePress's own
+   * site-level `lang`, so a Site that only wants its own language usually sets that
+   * one alone.
    *
-   * @default lang
+   * @default VitePress `lang`
    */
   locale?: string
 

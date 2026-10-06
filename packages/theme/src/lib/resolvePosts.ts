@@ -67,12 +67,17 @@ export function resolvePosts(
     author: defaultAuthor,
     authorScopes,
     locale,
-    dateFormat
+    dateFormat,
+    feed
   } = themeConfig
 
   const { mode, direction } = themeConfig.sort
 
-  const resolvedLocale = locale
+  // The date's locale: an explicit `locale` first, then the Feed's own language, which
+  // `FeedOptions.language` documents as the fallback. `formatDate` supplies `en-US`
+  // when neither is stated.
+  const feedLanguage = feed === false ? undefined : feed?.language
+  const resolvedLocale = locale ?? feedLanguage
   const resolvedFormat = dateFormat ?? DEFAULT_DATE_FORMAT
 
   const posts: Post[] = []

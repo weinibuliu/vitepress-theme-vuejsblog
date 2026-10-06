@@ -896,24 +896,10 @@ describe('resolvePosts — dates and locale', () => {
     expect(posts[0].date).not.toBe('September 1, 2024')
   })
 
-  it('falls back to `lang` for date formatting when `locale` is unset', () => {
-    const { posts } = run(
-      [candidate('posts/a.md', { title: 'A', date: '2024-09-01' })],
-      {
-        lang: 'zh-CN'
-      }
-    )
-    expect(posts[0].date).toBe('2024年9月1日')
-  })
-
-  it('prefers an explicit locale over lang', () => {
-    const { posts } = run(
-      [candidate('posts/a.md', { title: 'A', date: '2024-09-01' })],
-      {
-        lang: 'zh-CN',
-        locale: 'en-US'
-      }
-    )
+  it('uses the default en-US locale when neither locale nor feed.language is set', () => {
+    const { posts } = run([
+      candidate('posts/a.md', { title: 'A', date: '2024-09-01' })
+    ])
     expect(posts[0].date).toBe('September 1, 2024')
   })
 
@@ -934,21 +920,21 @@ describe('resolvePosts — dates and locale', () => {
   })
 })
 
-describe('withDefaults — lang fallback', () => {
-  it("takes VitePress's site-level lang when blog.lang is unset", () => {
-    expect(withDefaults({ title: 'B', author: 'A' }, 'zh-CN').lang).toBe(
+describe('withDefaults — locale fallback', () => {
+  it("takes VitePress's site-level lang when blog.locale is unset", () => {
+    expect(withDefaults({ title: 'B', author: 'A' }, 'zh-CN').locale).toBe(
       'zh-CN'
     )
   })
 
-  it('lets blog.lang win over the site lang', () => {
+  it('lets blog.locale win over the site lang', () => {
     expect(
-      withDefaults({ title: 'B', author: 'A', lang: 'en' }, 'zh-CN').lang
+      withDefaults({ title: 'B', author: 'A', locale: 'en' }, 'zh-CN').locale
     ).toBe('en')
   })
 
-  it('leaves lang undefined when neither is set, so useLang defaults to English', () => {
-    expect(withDefaults({ title: 'B', author: 'A' }).lang).toBeUndefined()
+  it('leaves locale undefined when neither is set, so formatDate defaults to en-US', () => {
+    expect(withDefaults({ title: 'B', author: 'A' }).locale).toBeUndefined()
   })
 })
 

@@ -10,9 +10,9 @@ import { withDefaults } from './config.js'
  * not live in a module that Node reaches. `config.ts` handles the Node side (a Site's
  * VitePress config, a `buildEnd` hook); this file handles components.
  *
- * Both paths must resolve the same defaults — including `lang` falling back to VitePress's
- * site-level `lang` — or the interface strings would differ between a server-rendered page
- * and that same page after hydration.
+ * Both paths must resolve the same defaults — including `locale` falling back to
+ * VitePress's site-level `lang` — or date formatting would differ between a
+ * server-rendered page and that same page after hydration.
  */
 
 /**
