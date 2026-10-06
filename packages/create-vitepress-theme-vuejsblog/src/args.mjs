@@ -4,10 +4,11 @@ import { DEFAULT_LANG, PACKAGE_MANAGERS, PRESETS } from './constants.mjs'
 /**
  * Command-line parsing.
  *
- * Hand-written rather than delegated, for two reasons. The flags are part of this
+ * Hand-written rather than delegated, for one reason: the flags are part of this
  * package's published interface, so they should be readable in one place rather than
- * inferred from a library's conventions; and the CLI has no runtime dependencies at
- * all, which is what lets `npm create` work with no install of its own.
+ * inferred from a library's conventions. The prompts and the templates do use
+ * libraries — `@clack/prompts` and `eta` — but those are about how a question is asked
+ * and how a file is filled, not about what this CLI accepts.
  */
 
 /**

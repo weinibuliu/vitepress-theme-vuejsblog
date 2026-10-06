@@ -1,5 +1,5 @@
 {
-  "buildCommand": %s,
+  "buildCommand": <%= json(buildCommand) %>,
   "outputDirectory": ".vitepress/dist",
   "cleanUrls": true,
   "headers": [

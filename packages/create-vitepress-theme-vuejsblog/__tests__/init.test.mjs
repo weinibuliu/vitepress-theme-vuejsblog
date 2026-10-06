@@ -1,73 +1,23 @@
-import { describe, expect, it } from 'vitest'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { parseArgs } from '../src/args.mjs'
-import {
-  collectAnswers,
-  detectPackageManager,
-  packageNameFromDirectory,
-  titleFromDirectory
-} from '../src/questions.mjs'
+import { collectAnswers, targetState } from '../src/init.mjs'
 import { PACKAGE_MANAGERS } from '../src/constants.mjs'
 
 /**
- * `collectAnswers` is the seam between "what the caller said" and "what the file set
- * is built from", and the tests below are mostly about the second half: that a flag,
- * a prompt and a default all arrive as the same value.
+ * The seam between "what the caller said" and "what the Site is built from".
  *
- * Nothing here can prompt — vitest has no TTY — so these are also the tests of the
- * non-interactive path, which is the one CI takes.
+ * `collectAnswers` is tested with `interactive: false`, which is also the path CI
+ * takes: vitest has no TTY, and under `--yes` every question answers from the default
+ * it was given. What matters is that a flag, a prompt and a default all arrive as the
+ * same value, so the file set never has to know which way it was told.
  */
 
-const answersFor = (argv) => collectAnswers(parseArgs(argv))
+const answersFor = (argv) => collectAnswers(parseArgs(argv), false)
 
-describe('titleFromDirectory', () => {
-  it('turns a directory name into something worth putting in a heading', () => {
-    expect(titleFromDirectory('my-blog')).toBe('My Blog')
-    expect(titleFromDirectory('notes_on_vue')).toBe('Notes On Vue')
-    expect(titleFromDirectory('/home/me/Code/the.blog')).toBe('The Blog')
-  })
-
-  it('falls back to a name rather than an empty heading', () => {
-    expect(titleFromDirectory('/')).toBe('My Blog')
-  })
-})
-
-describe('packageNameFromDirectory', () => {
-  it('produces something npm would accept', () => {
-    expect(packageNameFromDirectory('My Blog')).toBe('my-blog')
-    expect(packageNameFromDirectory('.blog')).toBe('blog')
-    expect(packageNameFromDirectory('a/b/My Notes')).toBe('my-notes')
-  })
-
-  it('never returns an empty name', () => {
-    expect(packageNameFromDirectory('...')).toBe('my-blog')
-    expect(packageNameFromDirectory('/')).toBe('my-blog')
-  })
-})
-
-describe('detectPackageManager', () => {
-  it('reads the user agent every package manager sets', () => {
-    expect(
-      detectPackageManager('pnpm/12.8.1 npm/? node/v22.22.1 linux x64')
-    ).toBe('pnpm')
-    expect(detectPackageManager('npm/9.2.0 node/v22.22.1 linux x64')).toBe(
-      'npm'
-    )
-    expect(detectPackageManager('yarn/1.22.22 npm/? node/v22.22.1')).toBe(
-      'yarn'
-    )
-    expect(detectPackageManager('bun/1.1.0 npm/? node/v22.22.1')).toBe('bun')
-  })
-
-  it('falls back to npm rather than to nothing', () => {
-    // An empty string, not `undefined`: `undefined` re-triggers the default parameter, which
-    // reads `process.env.npm_config_user_agent`. Under `pnpm test` that is pnpm itself, so
-    // this assertion passed when vitest was run directly and failed under the repo's own gate.
-    expect(detectPackageManager('')).toBe('npm')
-    expect(detectPackageManager('something-else/1.0')).toBe('npm')
-  })
-})
-
-describe('collectAnswers', () => {
+describe('collectAnswers without a terminal', () => {
   it('derives what it can from the directory and defaults the rest', async () => {
     const answers = await answersFor(['my-notes'])
 
@@ -153,5 +103,40 @@ describe('collectAnswers', () => {
     const answers = await answersFor([])
     expect(answers.targetDir).toBe('my-blog')
     expect(answers.title).toBe('My Blog')
+  })
+})
+
+describe('targetState', () => {
+  let root
+
+  beforeEach(() => {
+    root = mkdtempSync(path.join(os.tmpdir(), 'create-vp-vuejsblog-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('reports a directory that is not there', () => {
+    expect(targetState(path.join(root, 'nope'))).toBe('absent')
+  })
+
+  it('reports an empty directory', () => {
+    const dir = path.join(root, 'empty')
+    mkdirSync(dir)
+    expect(targetState(dir)).toBe('empty')
+  })
+
+  it('reports a directory with anything in it', () => {
+    const dir = path.join(root, 'full')
+    mkdirSync(dir)
+    writeFileSync(path.join(dir, 'notes.md'), 'hello')
+    expect(targetState(dir)).toBe('occupied')
+  })
+
+  it('reports a file where a directory was expected', () => {
+    const file = path.join(root, 'a-file')
+    writeFileSync(file, '')
+    expect(targetState(file)).toBe('not-a-directory')
   })
 })

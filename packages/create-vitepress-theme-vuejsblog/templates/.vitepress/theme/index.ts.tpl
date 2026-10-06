@@ -1,4 +1,4 @@
-import Theme from '%s'
+import Theme from '<%= themePackage %>'
 
 import './theme.css'
 

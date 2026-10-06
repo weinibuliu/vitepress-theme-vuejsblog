@@ -35,6 +35,10 @@
   "scripts": {
     "start": "node ./index.mjs"
   },
+  "dependencies": {
+    "@clack/prompts": "^1.8.1",
+    "eta": "^4.6.0"
+  },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
   }

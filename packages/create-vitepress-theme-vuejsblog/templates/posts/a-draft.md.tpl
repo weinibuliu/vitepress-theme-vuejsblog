@@ -1,6 +1,6 @@
 ---
 title: A draft
-date: %s
+date: <%= date %>
 draft: true
 ---
 

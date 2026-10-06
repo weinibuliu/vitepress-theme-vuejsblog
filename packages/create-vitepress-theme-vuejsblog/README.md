@@ -93,7 +93,9 @@ Node `^20.19.0 || >=22.12.0`, the same range VitePress 2 needs. The generated Si
 `vitepress@2.0.0-alpha.20`, because the Theme reads `globalThis.VITEPRESS_CONFIG.site`,
 which VitePress 1.x does not provide.
 
-The scaffolder itself has no dependencies and no build step.
+The scaffolder itself has no build step. Its two runtime dependencies are
+[`@clack/prompts`](https://www.npmjs.com/package/@clack/prompts), for the questions, and
+[`eta`](https://www.npmjs.com/package/eta), for the templates.
 
 ## License
 

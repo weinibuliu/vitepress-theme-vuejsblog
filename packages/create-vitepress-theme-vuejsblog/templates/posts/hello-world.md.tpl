@@ -1,6 +1,6 @@
 ---
 title: Hello, world
-date: %s
+date: <%= date %>
 description: The first post on this blog, and a note on how to write the next one.
 ---
 
@@ -14,7 +14,7 @@ Add a file to `posts/`:
 ```md
 ---
 title: A second post
-date: %s
+date: <%= date %>
 description: Shown in the list on the index, and used as the Feed summary.
 ---
 

@@ -20,12 +20,24 @@ jobs:
     steps:
       - uses: actions/checkout@v6.1.0
 
-%s
-      - name: Install Dependence
-        run: %s
+<% if (packageManager === 'pnpm') { %>      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.1.0
+        with:
+          cache: true
+
+<% } else if (packageManager === 'bun') { %>      - name: Setup bun
+        uses: oven-sh/setup-bun@v2.2.0
+
+<% } %><% if (packageManager !== 'bun') { %>      - name: Setup Node
+        uses: actions/setup-node@v6.5.0
+        with:
+          node-version: 22
+
+<% } %>      - name: Install Dependence
+        run: <%= installCommand %>
 
       - name: Build Dist
-        run: %s
+        run: <%= buildCommand %>
 
       - name: Setup Pages
         uses: actions/configure-pages@v6.0.0

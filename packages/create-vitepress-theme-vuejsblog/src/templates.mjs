@@ -1,8 +1,16 @@
 import { readFileSync } from 'node:fs'
-import { render } from './render.mjs'
+
+import { Eta } from 'eta'
 
 /**
  * The Site's files, as files.
+ *
+ * Templates are Eta, so a template can decide for itself what it says when a value is
+ * missing: `<% if (baseUrl) { %>` is the whole of "the Feed link only exists when
+ * there is a Feed". The alternative — every branch assembled in JavaScript and handed
+ * to a template as a pre-chewed string — puts the prose somewhere other than the file
+ * a reader will actually read. Values arrive raw; `values.mjs` explains how each one
+ * has to be spelled.
  *
  * A template is named after the file it becomes, plus `.tpl`:
  * `templates/.vitepress/config.ts.tpl` is written to `.vitepress/config.ts`. The suffix
@@ -16,20 +24,29 @@ import { render } from './render.mjs'
  * The directory is located through `import.meta.url`, not the working directory: the CLI
  * runs from wherever the caller is standing, and the templates travel with the package.
  *
- * Read once and kept. A scaffold reads all of them, so a run does one pass over the
- * filesystem, and the tests — which call `createFiles` many times — read them once.
+ * `autoEscape: false` because every value is already spelled for its destination by
+ * `values.mjs`; escaping again would double-escape a title in the config. `autoTrim:
+ * false` because a template that trims its own newlines writes files whose whitespace
+ * no longer matches the template you edited. `useWith: true` is what lets a template
+ * name `title` instead of `it.title`, and call `quote()` and `literal()` directly.
  */
 
 const ROOT = new URL('../templates/', import.meta.url)
-const cache = new Map()
+
+const eta = new Eta({
+  useWith: true,
+  autoEscape: false,
+  autoTrim: false
+})
 
 /**
- * The rendered `templates/<name>.tpl`, with `values` filled in left to right.
- *
- * A template with no `%s` needs no values; passing more or fewer than the template has
- * placeholders is an error rather than a shrug — see `render.mjs`.
+ * Read once and kept: a scaffold reads all of them, so a run does one pass over the
+ * filesystem, and the tests read them once each as well.
  */
-export function template(name, values = []) {
+const cache = new Map()
+
+/** The rendered `templates/<name>.tpl`, with `data` in scope. */
+export function template(name, data = {}) {
   let text = cache.get(name)
 
   if (text === undefined) {
@@ -37,5 +54,5 @@ export function template(name, values = []) {
     cache.set(name, text)
   }
 
-  return render(text, values)
+  return eta.renderString(text, data)
 }

@@ -5,7 +5,26 @@
  * token moves every surface that reads it.
  */
 
-%s
+<% if (preset === 'default') { %>/**
+ * The brand palette is the Theme's own default: VitePress's green scale, which
+ * is already defined per mode and already contrast-checked. For one of the Theme's
+ * four presets instead, uncomment the import below — the names are `emerald`,
+ * `rose`, `violet` and `amber`.
+ *
+ * Importing a preset is worth preferring over pasting hex values: it is a file
+ * inside the Theme's package, so it stays correct when the Theme is upgraded.
+ */
+
+/* @import '<%= brandPresetDir %>/emerald.css'; */
+<% } else { %>/**
+ * The brand palette, imported from the Theme's `<%= preset %>` preset. It sets
+ * only the brand tokens, so the layout, background and typography are untouched.
+ * The other names are `emerald`, `rose`, `violet` and `amber`; the default green
+ * needs no import.
+ */
+
+@import '<%= brandPresetDir %>/<%= preset %>.css';
+<% } %>
 /**
  * Your own colours, instead of a preset. Both modes need their own value: a hue that
  * reads well on white is usually too dark on near-black.

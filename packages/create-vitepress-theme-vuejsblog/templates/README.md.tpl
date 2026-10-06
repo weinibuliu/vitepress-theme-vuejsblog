@@ -1,15 +1,15 @@
-# %s
+# <%= title %>
 
-%s
+<%= description || readmeDescription %>
 
 ## Getting started
 
 ```bash
-%s
-%s
+<%= installCommand %>
+<%= devCommand %>
 ```
 
-`%s` writes the production site to `.vitepress/dist`.
+`<%= buildCommand %>` writes the production site to `.vitepress/dist`.
 
 ## Layout
 
@@ -32,7 +32,7 @@ A Post is a Markdown file in `posts/` with a `title` and a `date`:
 ```md
 ---
 title: A post
-date: %s
+date: <%= date %>
 description: Shown on the index and used as the Feed summary.
 ---
 
@@ -48,7 +48,31 @@ The body. It starts at `##` — the `title` becomes the page heading.
 | `updated`     | no       | Shown under the title, exactly as written                     |
 | `draft`       | no       | `true` keeps it out of the Blog and the Feed in a build       |
 
-%s## Learn more
+<% if (!author) { %>The default author is not set yet. Add `author: { name: 'Your Name' }` under
+`themeConfig.blog` in `.vitepress/config.ts`, or give each Post its own `author`.
+
+<% } %><% if (!baseUrl) { %>## The Feed
+
+No RSS feed is generated yet: `themeConfig.blog.baseUrl` is not set, and every link in
+a Feed has to be absolute. Set it to this site's origin in `.vitepress/config.ts` —
+`baseUrl: 'https://example.com'` — and the build writes `feed.rss`.
+
+<% } %><% if (deploy) { %>## Deploying
+
+- **GitHub Pages** — `.github/workflows/deploy.yml` builds and publishes on every push
+  to `main`. Turn on Pages for the repository with "GitHub Actions" as the source. A
+  project site is served from `https://<user>.github.io/<repo>/`, so uncomment `base`
+  in `.vitepress/config.ts` and name the repository.
+- **Vercel** — `vercel.json` sets the build command and output directory, so importing
+  the repository is enough.
+
+<% } %><% if (preset !== 'default') { %>## Looks
+
+The brand palette comes from the Theme's `<%= preset %>` preset, imported in
+`.vitepress/theme/theme.css`. Change the import for another preset, or comment it out
+and use the colours in the block below it.
+
+<% } %>## Learn more
 
 - [VitePress documentation](https://vitepress.dev)
 - `themeConfig.blog` — every option, plus layout slots, in the Theme's own README
