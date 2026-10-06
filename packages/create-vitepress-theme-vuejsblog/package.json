@@ -1,6 +1,6 @@
 {
   "name": "create-vitepress-theme-vuejsblog",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Scaffold a VitePress blog that uses the vitepress-theme-vuejsblog theme",
   "keywords": [
     "blog",
