@@ -119,6 +119,12 @@ title that differs between them — or is written in another language — still 
 choice; a Tab stating none is identified by its title.
 _Avoid_: key, slug, anchor
 
+**Code Group**:
+A set of code blocks a reader sees one at a time, written in VitePress's `::: code-group` form
+with each fence stating its title in brackets. VitePress parses it and switches it; the Theme
+styles it. It is not a Tab Group: its panels are code, not Markdown or Vue.
+_Avoid_: code tabs, code block group, hope code-group
+
 ### Reading a Post
 
 **TOC**:

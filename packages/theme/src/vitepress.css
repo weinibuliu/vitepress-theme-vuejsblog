@@ -40,4 +40,22 @@
 @import 'vitepress/dist/client/theme-default/styles/icons.css';
 @import 'vitepress/dist/client/theme-default/styles/components/vp-doc.css';
 @import 'vitepress/dist/client/theme-default/styles/components/vp-code.css';
+
+/**
+ * Code Groups — `::: code-group`, the form where each fence's `[title]` names its tab.
+ *
+ * This is VitePress's feature, not the Theme's, and it has no switch: VitePress's markdown
+ * config registers the `code-group` container unconditionally
+ * (`src/node/markdown/plugins/containers.ts`) and its client app switches the panels. So the
+ * one thing the Theme must add is the stylesheet that switching is expressed in. It lives in
+ * the default theme's entry point (`theme-default/without-fonts.ts`), and a custom theme
+ * inherits none of that entry point's imports — the reason this file exists at all. Without
+ * it the container still parses, and every panel and its raw radio inputs are shown at once.
+ *
+ * The `::: tabs` container is a different feature — a general container with a component of
+ * its own, in `lib/tabs.ts`, `components/BlogTabs.vue` and the tabs section of `style.css`.
+ * See `.agents/adr/0015-code-groups-are-vitepresss-and-only-their-styling-is-ours.md`.
+ */
+@import 'vitepress/dist/client/theme-default/styles/components/vp-code-group.css';
+
 @import 'vitepress/dist/client/theme-default/styles/components/custom-block.css';

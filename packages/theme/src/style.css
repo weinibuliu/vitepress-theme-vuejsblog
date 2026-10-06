@@ -214,7 +214,7 @@
 }
 
 .vp-blog-external-link::after {
-  content: "";
+  content: '';
   flex: none;
   width: 0.6em;
   height: 0.6em;
@@ -230,7 +230,6 @@
   -webkit-mask-size: contain;
   mask-size: contain;
 }
-
 
 .vp-blog-layout-nav-links {
   display: flex;
@@ -580,6 +579,83 @@
     border-bottom: 1px solid var(--vp-c-divider);
     font-weight: 600;
   }
+}
+
+/* ------------------------------------------------------------- code groups */
+
+/**
+ * VitePress's `::: code-group`, wearing the Theme's Tabs.
+ *
+ * The container is VitePress's — it parses the fences and its client app switches the panels
+ * (`vitepress/dist/client/theme-default/styles/components/vp-code-group.css`, imported in
+ * `vitepress.css`) — so nothing here changes how a Code Group behaves. It only re-dresses it in
+ * the shapes `.vp-blog-tabs` states above, so a page writing both kinds of Tab shows one row of
+ * titles rather than two: the same bordered box, the same soft row, and the same chosen title —
+ * a surface lifted out of that row with the accent on its word — instead of VitePress's own
+ * underline bar.
+ *
+ * The panels stay VitePress's. Only the chosen one is ever shown, and its code block is the
+ * panel, so the block fills the box rather than sitting inside a padded pane: there is no pane
+ * to pad, and no title to print above each block, which is why the fallback `.vp-blog-tabs`
+ * states for paper and `scripting: none` has no counterpart here. See
+ * `.agents/adr/0015-code-groups-are-vitepresss-and-only-their-styling-is-ours.md`.
+ */
+.vp-code-group {
+  margin: 1.5rem 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  /* The row's soft surface would otherwise square off the box's top corners. */
+  overflow: hidden;
+}
+
+.vp-code-group .tabs {
+  gap: 0.25rem;
+  /* VitePress bleeds this row 1.5rem into the gutter below 40rem. The Theme's Tabs do not, and
+     a row that did would overhang the box it was just put inside. */
+  margin-inline: 0;
+  padding: 0.375rem;
+  border-bottom: 1px solid var(--vp-c-divider);
+  background-color: var(--vp-c-bg-soft);
+  /* The imported rule's inset divider; the row now states one as a border instead. */
+  box-shadow: none;
+}
+
+.vp-code-group .tabs label {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  background-color: transparent;
+  color: var(--vp-c-text-2);
+
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+
+  transition:
+    color 0.25s,
+    background-color 0.25s,
+    border-color 0.25s;
+}
+
+.vp-code-group .tabs label:hover {
+  color: var(--vp-c-text-1);
+}
+
+/**
+ * The chosen title, in the Theme's shape: a surface lifted out of the row and the accent on the
+ * word. VitePress states the same thing as a 2px bar under the label — that bar is the label's
+ * `::after`, and it would sit inside the pill rather than under it.
+ */
+.vp-code-group .tabs input:checked + label {
+  border-color: var(--vp-c-divider);
+  background-color: var(--vp-c-bg);
+  color: var(--vp-c-brand-1);
+}
+
+.vp-code-group .tabs label::after {
+  content: none;
 }
 
 /* --------------------------------------------------------------- byline/nav */

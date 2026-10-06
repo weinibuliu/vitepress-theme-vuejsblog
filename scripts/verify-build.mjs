@@ -1177,6 +1177,63 @@ check(
   'the row or its panes lost their roles'
 )
 
+// Code Groups are VitePress's container, so what is asserted here is the Theme's whole part in
+// them: VitePress still parses the container, group-icons' `data-title` still reaches the
+// labels, exactly one panel is chosen while the rest ship hidden, and the stylesheet both
+// catches them from VitePress and dresses them in the Tab Group's shape.
+const codeGroups = (tabsMarkup.match(/class="vp-code-group"/g) ?? []).length
+const codeGroupTitles = [
+  ...tabsMarkup.matchAll(/<label data-title="([^"]+)"/g)
+].map((match) => match[1])
+const codeGroupPanels = [
+  ...tabsMarkup.matchAll(/<div class="(language-sh[^"]*)"/g)
+]
+const chosenCodePanels = codeGroupPanels.filter(([, classes]) =>
+  /\bactive\b/.test(classes)
+)
+check(
+  'the demo page renders Code Groups',
+  codeGroups > 0,
+  'no vp-code-group in the built page — VitePress did not parse the container'
+)
+check(
+  'a Code Group label carries the fence title, which is where its icon comes from',
+  ['npm', 'yarn', 'pnpm'].every((title) => codeGroupTitles.includes(title)),
+  codeGroupTitles.join(' | ')
+)
+check(
+  'a Code Group renders every panel and marks exactly one chosen',
+  codeGroupPanels.length === 3 && chosenCodePanels.length === 1,
+  `${codeGroupPanels.length} panel(s), ${chosenCodePanels.length} chosen`
+)
+// The rule VitePress hides panels with lives in a stylesheet only the default theme imports, so
+// this is the check that says the Theme imported it: without it every panel shows at once.
+check(
+  'the stylesheet hides every Code Group panel but the chosen one',
+  /\.vp-code-group div\[class\*=language-\][^{}]*\{[^}]*display:none/.test(
+    css
+  ) &&
+    /\.vp-code-group div\[class\*=language-\]\.active[^{}]*\{[^}]*display:block/.test(
+      css
+    ),
+  'the hide/show rules for Code Groups are missing from the built CSS'
+)
+// And this is the Theme's own half: the box, row and chosen title restated to match
+// `.vp-blog-tabs`, which is the whole reason the feature looks native here.
+check(
+  'the Theme dresses Code Groups as it dresses Tab Groups',
+  /\.vp-code-group\{[^}]*border:1px solid var\(--vp-c-divider\)[^}]*border-radius:8px/.test(
+    css
+  ) &&
+    /\.vp-code-group \.tabs\{[^}]*background-color:var\(--vp-c-bg-soft\)/.test(
+      css
+    ) &&
+    /\.vp-code-group \.tabs input:checked\+label\{[^}]*color:var\(--vp-c-brand-1\)/.test(
+      css
+    ),
+  'the Code Group alignment rules are missing from the built CSS'
+)
+
 // The Tab classes are checked against the built stylesheet as the other Theme classes are: the
 // class-coverage pass above only reads the four pages it names, and this page is not one of them.
 const tabClasses = new Set(
