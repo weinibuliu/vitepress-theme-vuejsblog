@@ -18,7 +18,7 @@ export const THEME_PACKAGE = 'vitepress-theme-vuejsblog'
  * The Theme's version range. The Theme is a peer of no one, so a caret range is
  * right: the Site's config is stable across the Theme's minor releases.
  */
-export const THEME_VERSION = '^0.1.3'
+export const THEME_VERSION = '^0.1.4'
 
 /**
  * VitePress 2 is an alpha and the Theme reads `globalThis.VITEPRESS_CONFIG.site`,
