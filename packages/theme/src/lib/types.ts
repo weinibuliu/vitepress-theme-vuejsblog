@@ -374,21 +374,11 @@ export interface HeroConfig {
 }
 
 /**
- * A link in the Theme's top navigation row.
+ * The half of a row entry that is the same however the entry is drawn: it is a link, and it
+ * may keep VitePress's client router away from it.
  */
-export interface NavItem {
+interface EntryBase {
   link: string
-
-  /**
-   * Ignored when `icon` present
-   */
-  text?: string
-
-  /**
-   * SVG String
-   *
-   */
-  icon?: string
 
   /**
    * Open in a new tab. Defaults to `true` for absolute URLs.
@@ -402,20 +392,56 @@ export interface NavItem {
 }
 
 /**
- * A link in the Theme's footer.
- *
- * Same shape as `NavItem`, so a Site describes a link the same way in both places.
+ * A row entry drawn as an icon.
  */
-export interface FooterLink {
-  text: string
-  link: string
+interface IconEntry extends EntryBase {
   /**
-   * Open in a new tab. Defaults to `true` for absolute URLs.
+   * Whole SVG markup, as one string — what `v-html` mounts inside the entry's own box.
    *
-   * The Feed needs it for the same reason it does in the nav — see `NavItem.external`.
+   * Markup rather than the Theme's `ResolvedSocialIcon` (`{ name } | { svg } | { src }`), which
+   * the Author's Social Links use: a Social Link is built from a platform the Theme already
+   * knows, while a row entry is the Site's own, written in its own config. Markup in, markup out
+   * is also one rule for the nav row and the footer row, so an entry means the same thing in
+   * both. ADR 0004 is the Social Link half of that boundary.
    */
-  external?: boolean
+  icon: string
+
+  /**
+   * The entry's name. It is not drawn while `icon` is — it becomes the link's `aria-label`, so
+   * an icon-only entry is still a link with a name rather than a nameless glyph.
+   */
+  text?: string
 }
+
+/**
+ * A row entry drawn as text.
+ */
+interface TextEntry extends EntryBase {
+  /**
+   * The entry's name, drawn as the link's label and read as its accessible name in the
+   * ordinary way.
+   */
+  text: string
+
+  icon?: never
+}
+
+/**
+ * An entry in the Theme's top navigation row.
+ *
+ * The row draws text, or an icon in place of it, and the union is what makes that the whole
+ * story: an entry stating neither is not an entry, and the type rejects it rather than letting
+ * it render as an empty anchor.
+ */
+export type NavItem = IconEntry | TextEntry
+
+/**
+ * An entry in the Theme's footer.
+ *
+ * Same shape as `NavItem`, so a Site describes an entry the same way in both places. The two
+ * rows differ in layout and in the size their icons are drawn at, never in what an entry is.
+ */
+export type FooterItem = IconEntry | TextEntry
 
 /**
  * The Theme's footer.
@@ -435,9 +461,10 @@ export interface FooterConfig {
    */
   text?: string
   /**
-   * The links, laid out as one row opposite `text`.
+   * The entries, laid out as one row opposite `text`. An entry carrying an `icon` is an Icon
+   * Link: it shows the icon alone, and draws no External Arrow.
    */
-  links?: FooterLink[]
+  items?: FooterItem[]
 }
 
 /**
@@ -708,7 +735,7 @@ export interface ResolvedBlogConfig extends BlogThemeConfig {
  * ask whether it exists.
  */
 export interface ResolvedFooterConfig extends FooterConfig {
-  links: FooterLink[]
+  items: FooterItem[]
 }
 
 /**

@@ -3,19 +3,19 @@ import { withDefaults } from '../src/lib/config.js'
 import type { SortOptions } from '../src/lib/types.js'
 
 describe('withDefaults footer', () => {
-  it('gives an absent footer an empty link list', () => {
-    // Callers read `links.length` directly, so an absent list would be a crash rather
+  it('gives an absent footer an empty entry list', () => {
+    // Callers read `items.length` directly, so an absent list would be a crash rather
     // than an empty footer.
     expect(withDefaults({ title: 'Blog' }).footer).toEqual({
       text: undefined,
-      links: []
+      items: []
     })
   })
 
-  it('carries text and links through unchanged', () => {
+  it('carries text and entries through unchanged', () => {
     const footer = {
       text: '© 2026 Me',
-      links: [{ text: 'RSS', link: '/feed.rss' }]
+      items: [{ text: 'RSS', link: '/feed.rss' }]
     }
     expect(withDefaults({ title: 'Blog', footer }).footer).toEqual(footer)
   })
@@ -23,17 +23,33 @@ describe('withDefaults footer', () => {
   it('fills in an empty list when only text is given', () => {
     const { footer } = withDefaults({ title: 'Blog', footer: { text: 'Hi' } })
     expect(footer.text).toBe('Hi')
-    expect(footer.links).toEqual([])
+    expect(footer.items).toEqual([])
   })
 
   it('keeps the two roles independent', () => {
     // The roles exist because they lay out differently; neither should imply the other.
     const { footer } = withDefaults({
       title: 'Blog',
-      footer: { links: [{ text: 'RSS', link: '/feed.rss' }] }
+      footer: { items: [{ text: 'RSS', link: '/feed.rss' }] }
     })
     expect(footer.text).toBeUndefined()
-    expect(footer.links).toHaveLength(1)
+    expect(footer.items).toHaveLength(1)
+  })
+
+  it('carries an Icon Link through as the Site wrote it', () => {
+    // The Theme resolves nothing about an entry's icon: it is the Site's own markup, and
+    // `Layout` is what mounts it. Resolution here would be the Theme second-guessing it.
+    const icon =
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>'
+    const { footer } = withDefaults({
+      title: 'Blog',
+      footer: {
+        items: [{ icon, link: 'https://example.com/', text: 'Example' }]
+      }
+    })
+    expect(footer.items).toEqual([
+      { icon, link: 'https://example.com/', text: 'Example' }
+    ])
   })
 })
 

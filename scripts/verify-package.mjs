@@ -182,7 +182,17 @@ export default defineConfig<ThemeConfig>({
         text: 'A footer <a href="https://example.com/">link</a>',
         // "external" keeps the Feed out of VitePress's client router: an internal /feed.rss
         // is read as a page route and answered with the 404 page.
-        links: [{ text: 'RSS', link: '/feed.rss', external: true }]
+        items: [
+          { text: 'RSS', link: '/feed.rss', external: true },
+          // An Icon Link: the glyph is the whole visible label and its text is the
+          // accessible name it leaves behind. No backticks in here: this block is one
+          // template literal, and one would end it early.
+          {
+            text: 'Example',
+            icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle data-icon="example" cx="12" cy="12" r="10" fill="currentColor" /></svg>',
+            link: 'https://example.com/'
+          }
+        ]
       },
       // HTML, and a link is the point: it must survive as a link rather than being shown
       // as literal markup. The description fallback beside it stays escaped. No backticks in
@@ -249,6 +259,20 @@ Hello from outside the workspace.
   )
   const css = readFileSync(path.join(dist, 'assets', cssFile), 'utf8')
 
+  // The footer's two kinds of entry, read out of the markup the Site's own config produced:
+  // one draws its words, the other draws the Site's icon and keeps `text` as the link's name.
+  const footerAnchors = [
+    ...home.matchAll(
+      /<a\b[^>]*class="[^"]*\bvp-blog-layout-footer-link\b[^"]*"[^>]*>[\s\S]*?<\/a>/g
+    )
+  ].map((match) => match[0])
+  const footerIconLink = footerAnchors.find((anchor) =>
+    anchor.includes('vp-blog-layout-footer-icon')
+  )
+  const footerTextLink = footerAnchors.find((anchor) =>
+    anchor.includes('>RSS<')
+  )
+
   const assertions = [
     [
       'the Blog index lists the Post',
@@ -312,7 +336,7 @@ Hello from outside the workspace.
         )
     ],
     [
-      'the footer renders its links as a separate group from the text',
+      'the footer renders its entries as a separate group from the text',
       home.includes('vp-blog-layout-footer-links') &&
         home.includes('vp-blog-layout-footer-link') &&
         home.includes('>RSS<')
@@ -324,6 +348,24 @@ Hello from outside the workspace.
       /<a[^>]*class="[^"]*vp-blog-layout-footer-link[^"]*"[^>]*target="_blank"/.test(
         home
       )
+    ],
+    [
+      // An Icon Link draws the Site's markup and no words: `text` is the accessible name
+      // it leaves behind, so the link is still a link a screen reader can announce.
+      'a footer Icon Link renders the Site’s markup in place of its words',
+      Boolean(footerIconLink) &&
+        footerIconLink.includes('data-icon="example"') &&
+        !footerIconLink.includes('>Example<')
+    ],
+    [
+      'a footer Icon Link is named by its text',
+      Boolean(footerIconLink) && footerIconLink.includes('aria-label="Example"')
+    ],
+    [
+      // The name moves to `aria-label` only because the words are gone; a text entry says
+      // its name in the ordinary way and needs no second copy of it.
+      'a footer text entry carries no aria-label',
+      Boolean(footerTextLink) && !footerTextLink.includes('aria-label')
     ],
     [
       'a footer slot renders, and lands after the Site’s links',
@@ -379,6 +421,13 @@ Hello from outside the workspace.
     ],
     ['colour tokens shipped', /--vp-c-bg:\s*\S/.test(css)],
     ['Markdown typography shipped', css.includes('.vp-doc')],
+    [
+      // The other half of the Icon Link rule: `CONTEXT.md` says an icon link draws no
+      // External Arrow in any region, and the class that marks the link stays either way.
+      // The nav's guard is asserted in verify-build; this is the footer's.
+      'a footer Icon Link draws no External Arrow',
+      css.includes(':has(.vp-blog-layout-footer-icon)')
+    ],
     [
       'a preset imported through its sub-path took effect',
       // Minified, so no space after the colon.

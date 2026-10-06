@@ -92,7 +92,7 @@ export function withDefaults(
     navSeparator: blog?.navSeparator ?? '·',
     footer: {
       text: blog?.footer?.text,
-      links: blog?.footer?.links ?? []
+      items: blog?.footer?.items ?? []
     },
     locale: blog?.locale ?? siteLang,
     dateFormat: blog?.dateFormat,

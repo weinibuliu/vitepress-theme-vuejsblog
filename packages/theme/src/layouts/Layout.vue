@@ -57,16 +57,19 @@ const logo = computed(() => blog.value.logo)
  * a same-origin file needs too: VitePress's client router would take `/feed.rss` for a page
  * route, so the Site marks it `external: true` to keep it out of the router, and an arrow on
  * it would claim the reader is leaving the Blog when they are not.
+ *
+ * Both rows go through this: an entry is an entry whether the nav or the footer draws it, so
+ * the two computeds differ only in where they read from.
  */
-const nav = computed(() =>
+const navItems = computed(() =>
   blog.value.nav.map((item) => ({
     ...item,
     isExternal: isExternal(item.link),
     opensNewTab: item.external ?? isExternal(item.link)
   }))
 )
-const footerLinks = computed(() =>
-  blog.value.footer.links.map((item) => ({
+const footerItems = computed(() =>
+  blog.value.footer.items.map((item) => ({
     ...item,
     isExternal: isExternal(item.link),
     opensNewTab: item.external ?? isExternal(item.link)
@@ -92,14 +95,14 @@ const arrowSwitches = computed(() => ({
  * Whether the footer renders at all.
  *
  * `layout-footer-before` / `layout-footer-after` count: a Site that fills one of them and
- * configures no `text` or `links` still means to have a footer, and gating on the config
+ * configures no `text` or `items` still means to have a footer, and gating on the config
  * alone would silently drop the slot's content. Only these two are checked because they are
  * the only slots declared on Layout itself — every other slot belongs to a child component.
  */
 const hasFooter = computed(
   () =>
     Boolean(blog.value.footer.text) ||
-    blog.value.footer.links.length > 0 ||
+    blog.value.footer.items.length > 0 ||
     Boolean(slots['layout-footer-before'] || slots['layout-footer-after'])
 )
 </script>
@@ -136,7 +139,7 @@ const hasFooter = computed(
         </a>
 
         <div class="vp-blog-layout-nav-links">
-          <template v-for="(item, index) of nav" :key="index">
+          <template v-for="(item, index) of navItems" :key="index">
             <span
               v-if="index > 0"
               class="vp-blog-layout-nav-separator"
@@ -144,16 +147,21 @@ const hasFooter = computed(
             >
               {{ blog.navSeparator }}
             </span>
+            <!-- An Icon Link draws the glyph and no words, so `text` moves to `aria-label`
+                 rather than disappearing: an icon-only link is nameless otherwise. Where the
+                 Site gave none, the `link` is the name — the same fallback the old `title`
+                 used, which is all an icon-only entry has ever had to go on. -->
             <a
               class="vp-blog-layout-nav-link"
               :class="item.isExternal ? EXTERNAL_LINK_CLASS : undefined"
               :href="withBase(item.link)"
               :target="item.opensNewTab ? '_blank' : undefined"
               :rel="item.opensNewTab ? 'noopener noreferrer' : undefined"
+              :aria-label="item.icon ? (item.text ?? item.link) : undefined"
             >
               <span
-                class="vp-blog-layout-nav-icon"
                 v-if="item.icon"
+                class="vp-blog-layout-nav-icon"
                 v-html="item.icon"
               ></span>
               <template v-else>{{ item.text }}</template>
@@ -200,19 +208,26 @@ const hasFooter = computed(
         </p>
 
         <div
-          v-if="blog.footer.links.length"
+          v-if="blog.footer.items.length"
           class="vp-blog-layout-footer-links"
         >
           <a
-            v-for="(item, index) of footerLinks"
+            v-for="(item, index) of footerItems"
             :key="index"
             class="vp-blog-layout-footer-link"
             :class="item.isExternal ? EXTERNAL_LINK_CLASS : undefined"
             :href="withBase(item.link)"
             :target="item.opensNewTab ? '_blank' : undefined"
             :rel="item.opensNewTab ? 'noopener noreferrer' : undefined"
-            >{{ item.text }}</a
+            :aria-label="item.icon ? (item.text ?? item.link) : undefined"
           >
+            <span
+              v-if="item.icon"
+              class="vp-blog-layout-footer-icon"
+              v-html="item.icon"
+            ></span>
+            <template v-else>{{ item.text }}</template>
+          </a>
         </div>
 
         <slot name="layout-footer-after" />

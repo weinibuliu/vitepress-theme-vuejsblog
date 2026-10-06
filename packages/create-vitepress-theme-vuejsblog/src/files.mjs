@@ -258,7 +258,7 @@ function configFile(answers, year) {
     text: `© ${year} ${escapeHtml(answers.author || answers.title)}`
   }
   if (answers.baseUrl) {
-    footer.links = [{ text: 'RSS Feed', link: '/feed.rss', external: true }]
+    footer.items = [{ text: 'RSS Feed', link: '/feed.rss', external: true }]
   }
 
   return template('.vitepress/config.ts', [

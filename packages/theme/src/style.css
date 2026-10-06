@@ -245,6 +245,9 @@
  * noise. A link that carries the class for its own reasons is left alone too — the class is the
  * hook, not the mark.
  *
+ * Each row excludes its own icon class, because the two rows name and size theirs separately:
+ * the nav's is fixed, the footer's follows its row's font size.
+ *
  * The Markdown entry needs the longer selector because VitePress's own `vp-doc.css` has an
  * external-link rule written for its default theme. This Theme never adds the
  * `external-link-icon-enabled` class that gives that rule a `content`, so it stays inert — but
@@ -260,7 +263,9 @@
 .vp-blog-layout-nav-link.vp-blog-external-link:not(
     :has(.vp-blog-layout-nav-icon)
   )::after,
-.vp-blog-layout-footer-link.vp-blog-external-link::after,
+.vp-blog-layout-footer-link.vp-blog-external-link:not(
+    :has(.vp-blog-layout-footer-icon)
+  )::after,
 .vp-blog-ui-byline-name .vp-blog-external-link::after,
 .vp-doc a.vp-blog-external-link[href]:not(.no-icon):not(:has(img, svg))::after {
   content: '';
@@ -1260,6 +1265,21 @@
 
 .vp-blog-layout-footer-link:hover {
   color: var(--vp-blog-link-hover, var(--vp-c-brand-2));
+}
+
+/* Sized from the row rather than fixed like the nav's icon: the footer is a 0.875rem text row
+   set opposite the Site's prose, so a 24px glyph would outweigh the words beside it. `1.25em`
+   reads as an icon and still follows a Site that changes the row's font size. */
+.vp-blog-layout-footer-icon {
+  display: block;
+  inline-size: 1.25em;
+  block-size: 1.25em;
+}
+
+.vp-blog-layout-footer-icon > svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 /* --------------------------------------------------------------------- hero */

@@ -107,9 +107,17 @@ _Avoid_: outbound link, external URL, outlink
 
 **External Arrow**:
 The small mark the Theme draws after a text External Link to say that following it leaves the
-Site. It is decoration: switching it off in a region leaves the link's External Link class in
+Site. It is never drawn after an Icon Link, whose glyph is already its whole label. The arrow is
+decoration: switching it off in a region leaves the link's External Link class in
 place, so a Site's own redirect prompt keeps working.
 _Avoid_: icon, badge, marker, external-link icon
+
+**Icon Link**:
+A Theme Config entry drawn as an icon instead of words, in the nav row or the footer's. Its
+`text` is still its name — that is how a reader who cannot see the glyph gets one — and it draws
+no External Arrow. Unlike a Social Link, it is an entry the Site writes itself, and the Theme
+never resolves its icon.
+_Avoid_: icon button, glyph link, image link
 
 ### Writing a Post
 
