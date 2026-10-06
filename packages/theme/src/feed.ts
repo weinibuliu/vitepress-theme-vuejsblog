@@ -27,13 +27,13 @@ function feedOptionsOf(
 
 export interface GenFeedOptions {
   /**
-   * Generate the Feed even when `themeConfig.blog.baseUrl` is missing.
+   * Generate the Feed even when `themeConfig.blog.origin` is missing.
    *
-   * By default a missing `baseUrl` skips generation with a warning, because every
+   * By default a missing `origin` skips generation with a warning, because every
    * link in the Feed has to be absolute and guessing the origin would publish
    * wrong URLs.
    */
-  allowMissingBaseUrl?: boolean
+  allowMissingorigin?: boolean
 }
 
 /**
@@ -72,9 +72,9 @@ export async function genFeed(
 
   if (blog.feed === false) return
 
-  if (!blog.baseUrl && !options.allowMissingBaseUrl) {
+  if (!blog.origin && !options.allowMissingorigin) {
     config.logger.warn(
-      '[blog] themeConfig.blog.baseUrl is not set, so no Feed was generated. ' +
+      '[blog] themeConfig.blog.origin is not set, so no Feed was generated. ' +
         'Set it to your site origin, e.g. "https://example.com".'
     )
     return
@@ -172,7 +172,7 @@ export interface RenderFeedArgs {
   /**
    * Told when the Site's config leaves the Feed's addresses doubtful.
    *
-   * There is one such case: a `baseUrl` that already carries the Site's `base`. Appending the
+   * There is one such case: a `origin` that already carries the Site's `base`. Appending the
    * base again would publish links to a directory that does not exist, so the repetition is
    * dropped — but the Site did ask for it, and a Feed's addresses are the one thing it cannot
    * be wrong about, so the disagreement is reported rather than passed over.
@@ -218,14 +218,11 @@ export async function renderFeed({
   if (!posts.length) return undefined
 
   const feedOptions = feedOptionsOf(blog)
-  const { origin, duplicated } = withoutDoubledBase(
-    blog.baseUrl ?? '',
-    siteBase
-  )
+  const { origin, duplicated } = withoutDoubledBase(blog.origin ?? '', siteBase)
   if (duplicated) {
     warn?.(
-      '[blog] themeConfig.blog.baseUrl already ends with the Site base, so it was ' +
-        `not added a second time. baseUrl is the Site origin alone, e.g. ` +
+      '[blog] themeConfig.blog.origin already ends with the Site base, so it was ' +
+        `not added a second time. origin is the Site origin alone, e.g. ` +
         `"https://example.com" — the mount path comes from VitePress's base ` +
         `("${siteBase}").`
     )

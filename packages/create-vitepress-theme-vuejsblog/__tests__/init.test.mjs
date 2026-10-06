@@ -28,7 +28,7 @@ describe('collectAnswers without a terminal', () => {
     expect(answers.preset).toBe('default')
     expect(answers.deploy).toBe(true)
     expect(answers.author).toBe('')
-    expect(answers.baseUrl).toBe('')
+    expect(answers.origin).toBe('')
     expect(PACKAGE_MANAGERS).toContain(answers.packageManager)
   })
 
@@ -55,7 +55,7 @@ describe('collectAnswers without a terminal', () => {
       title: 'The Vue Point',
       description: 'Notes on Vue.',
       author: 'Evan You',
-      baseUrl: 'https://blog.vuejs.org',
+      origin: 'https://blog.vuejs.org',
       lang: 'zh-CN',
       preset: 'violet',
       packageManager: 'pnpm'
@@ -69,7 +69,7 @@ describe('collectAnswers without a terminal', () => {
       '--base-url',
       'https://example.com/'
     ])
-    expect(answers.baseUrl).toBe('https://example.com')
+    expect(answers.origin).toBe('https://example.com')
   })
 
   it('does not install or touch git unless it was asked to', async () => {

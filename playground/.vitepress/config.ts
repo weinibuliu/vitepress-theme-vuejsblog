@@ -32,10 +32,10 @@ export default defineConfig<ThemeConfig>({
         subtext:
           "This is not the official <a href='https://vuejs.org'>Vue.js</a> website. We just cite <a href='https://blog.vuejs.org'>blogs</a> to verify rendering."
       },
-      // The nav links to `/feed.rss`, so the Feed has to exist; `baseUrl` is what makes its
+      // The nav links to `/feed.rss`, so the Feed has to exist; `origin` is what makes its
       // links absolute, which RSS requires. It is the origin alone: this Site is mounted
       // under `base` above, and repeating that path here would publish a Feed of dead links.
-      baseUrl: 'https://weinibuliu.github.io',
+      origin: 'https://weinibuliu.github.io',
       author: {
         name: 'weinibuliu',
         gravatar:

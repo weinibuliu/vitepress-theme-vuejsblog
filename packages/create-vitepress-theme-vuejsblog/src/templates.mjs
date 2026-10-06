@@ -6,7 +6,7 @@ import { Eta } from 'eta'
  * The Site's files, as files.
  *
  * Templates are Eta, so a template can decide for itself what it says when a value is
- * missing: `<% if (baseUrl) { %>` is the whole of "the Feed link only exists when
+ * missing: `<% if (origin) { %>` is the whole of "the Feed link only exists when
  * there is a Feed". The alternative — every branch assembled in JavaScript and handed
  * to a template as a pre-chewed string — puts the prose somewhere other than the file
  * a reader will actually read. Values arrive raw; `values.mjs` explains how each one

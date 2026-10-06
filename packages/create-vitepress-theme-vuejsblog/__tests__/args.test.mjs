@@ -83,7 +83,7 @@ describe('parseArgs', () => {
   it('requires an absolute base url', () => {
     expect(() => parseArgs(['--base-url', 'example.com'])).toThrow(/http/)
     expect(
-      parseArgs(['--base-url', 'https://example.com']).options.baseUrl
+      parseArgs(['--base-url', 'https://example.com']).options.origin
     ).toBe('https://example.com')
   })
 

@@ -119,7 +119,7 @@ function validateTitle(value) {
   return undefined
 }
 
-function validateBaseUrl(value) {
+function validateorigin(value) {
   if (value === '') return undefined
   if (!/^https?:\/\//i.test(value)) {
     return 'Expected an absolute URL, e.g. https://example.com.'
@@ -187,12 +187,12 @@ export async function collectAnswers(args, interactive = isInteractive()) {
           initialValue: OPTION_DEFAULTS.author
         }),
 
-      baseUrl: async () =>
-        given.baseUrl ??
+      origin: async () =>
+        given.origin ??
         askText({
           message: 'Site origin, needed for the RSS feed (optional)',
-          initialValue: OPTION_DEFAULTS.baseUrl,
-          validate: validateBaseUrl
+          initialValue: OPTION_DEFAULTS.origin,
+          validate: validateorigin
         }),
 
       lang: async () =>
@@ -254,7 +254,7 @@ export async function collectAnswers(args, interactive = isInteractive()) {
   return {
     ...answers,
     // A trailing slash would produce `https://example.com//post` in the Feed.
-    baseUrl: answers.baseUrl.replace(/\/+$/, ''),
+    origin: answers.origin.replace(/\/+$/, ''),
     packageManager: given.packageManager ?? detectPackageManager(),
     themeVersion: given.themeVersion ?? THEME_VERSION
   }
@@ -277,7 +277,7 @@ export async function scaffold(options) {
     title,
     description = '',
     author = '',
-    baseUrl = '',
+    origin = '',
     lang = DEFAULT_LANG,
     preset = OPTION_DEFAULTS.preset,
     packageName,
@@ -294,12 +294,12 @@ export async function scaffold(options) {
   // `external` takes the Feed out of VitePress's client router, which would otherwise
   // read `/feed.rss` as a page route and answer with the 404 page instead of the Feed.
   const nav = [{ text: 'About', link: '/about' }]
-  if (baseUrl) {
+  if (origin) {
     nav.push({ text: 'RSS Feed', link: '/feed.rss', external: true })
   }
 
   const footer = { text: `© ${year} ${escapeHtml(author || title)}` }
-  if (baseUrl) {
+  if (origin) {
     footer.items = [{ text: 'RSS Feed', link: '/feed.rss', external: true }]
   }
 
@@ -307,7 +307,7 @@ export async function scaffold(options) {
     title,
     description,
     author,
-    baseUrl,
+    origin,
     lang,
     preset,
     packageName,
@@ -487,7 +487,7 @@ function nextSteps(answers, relativeTarget) {
 
   const todos = []
   if (!answers.author) todos.push('name the default author')
-  if (!answers.baseUrl) todos.push('set baseUrl to get the RSS feed')
+  if (!answers.origin) todos.push('set origin to get the RSS feed')
 
   if (todos.length > 0) {
     lines.push('')

@@ -37,7 +37,7 @@ describe('joinUrl', () => {
   })
 
   it('leaves the path alone when there is no prefix', () => {
-    // `allowMissingBaseUrl`: there is no origin to put in front of the path, and inventing a
+    // `allowMissingorigin`: there is no origin to put in front of the path, and inventing a
     // leading slash would be inventing a fact.
     expect(joinUrl('', '/posts/first')).toBe('/posts/first')
   })
@@ -45,7 +45,7 @@ describe('joinUrl', () => {
 
 describe('withoutDoubledBase', () => {
   it('drops a base the Site already wrote into the origin', () => {
-    // The playground's own mistake: `baseUrl` read as "the URL of the base" rather than as an
+    // The playground's own mistake: `origin` read as "the URL of the base" rather than as an
     // origin, so the Theme appended `/vitepress-theme-vuejsblog/` a second time.
     expect(
       withoutDoubledBase(

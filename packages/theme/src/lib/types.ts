@@ -554,7 +554,7 @@ export interface BlogThemeConfig {
    *
    * Required to generate a Feed; when omitted the Theme warns and skips Feed generation.
    */
-  baseUrl?: string
+  origin?: string
 
   /**
    * The Site's Default Author, used for any Post that credits none.

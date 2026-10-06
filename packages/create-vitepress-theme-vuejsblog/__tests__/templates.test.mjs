@@ -27,7 +27,7 @@ const ANSWERS = {
   title: 'My Blog',
   description: 'Notes on things I build.',
   author: 'Evan You',
-  baseUrl: 'https://example.com',
+  origin: 'https://example.com',
   lang: 'en',
   preset: 'default',
   deploy: true,

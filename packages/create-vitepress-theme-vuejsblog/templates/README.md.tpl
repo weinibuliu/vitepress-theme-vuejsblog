@@ -51,11 +51,11 @@ The body. It starts at `##` — the `title` becomes the page heading.
 <% if (!author) { %>The default author is not set yet. Add `author: { name: 'Your Name' }` under
 `themeConfig.blog` in `.vitepress/config.ts`, or give each Post its own `author`.
 
-<% } %><% if (!baseUrl) { %>## The Feed
+<% } %><% if (!origin) { %>## The Feed
 
-No RSS feed is generated yet: `themeConfig.blog.baseUrl` is not set, and every link in
+No RSS feed is generated yet: `themeConfig.blog.origin` is not set, and every link in
 a Feed has to be absolute. Set it to this site's origin in `.vitepress/config.ts` —
-`baseUrl: 'https://example.com'` — and the build writes `feed.rss`.
+`origin: 'https://example.com'` — and the build writes `feed.rss`.
 
 <% } %><% if (deploy) { %>## Deploying
 

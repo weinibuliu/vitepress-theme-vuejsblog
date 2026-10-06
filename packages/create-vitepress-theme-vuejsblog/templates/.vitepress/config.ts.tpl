@@ -35,11 +35,11 @@ export default defineConfig<ThemeConfig>({
     blog: {
       title: <%= quote(title) %>,
 <% if (description) { %>      description: <%= quote(description) %>,
-<% } %><% if (baseUrl) { %>      baseUrl: <%= quote(baseUrl) %>,
+<% } %><% if (origin) { %>      origin: <%= quote(origin) %>,
 <% } else { %>      // TODO: this Site's origin, e.g. https://example.com. No Feed is written
       // without it — every link in a Feed has to be absolute, and guessing the
       // origin would publish wrong ones.
-      // baseUrl: 'https://example.com',
+      // origin: 'https://example.com',
 <% } %><% if (author) { %>      author: { name: <%= quote(author) %> },
 <% } else { %>      // TODO: the Author a Post gets when it credits no one itself.
       // author: { name: 'Your Name' },

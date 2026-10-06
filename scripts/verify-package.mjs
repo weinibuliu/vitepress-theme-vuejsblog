@@ -168,7 +168,7 @@ export default defineConfig<ThemeConfig>({
     blog: {
       title: 'Consumer Blog',
       description: 'Verifies the published artefact.',
-      baseUrl: 'https://consumer.example',
+      origin: 'https://consumer.example',
       // Dates pinned to English so the date assertion stays meaningful while the
       // interface strings come from the site's lang.
       locale: 'en-US',

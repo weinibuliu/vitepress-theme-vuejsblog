@@ -62,8 +62,8 @@ const VALUE_FLAGS = {
   '--description': 'description',
   '-a': 'author',
   '--author': 'author',
-  '-u': 'baseUrl',
-  '--base-url': 'baseUrl',
+  '-u': 'origin',
+  '--base-url': 'origin',
   '--lang': 'lang',
   '--preset': 'preset',
   '--package-manager': 'packageManager',
@@ -157,7 +157,7 @@ export function parseArgs(argv) {
 }
 
 function validate(args) {
-  const { preset, packageManager, baseUrl, lang } = args.options
+  const { preset, packageManager, origin, lang } = args.options
 
   if (preset !== undefined && !PRESETS.includes(preset)) {
     throw new UsageError(
@@ -174,9 +174,9 @@ function validate(args) {
     )
   }
 
-  if (baseUrl !== undefined && !/^https?:\/\//i.test(baseUrl)) {
+  if (origin !== undefined && !/^https?:\/\//i.test(origin)) {
     throw new UsageError(
-      `--base-url must start with http:// or https://, got "${baseUrl}".`
+      `--base-url must start with http:// or https://, got "${origin}".`
     )
   }
 
@@ -196,7 +196,7 @@ function validate(args) {
 export const OPTION_DEFAULTS = {
   description: '',
   author: '',
-  baseUrl: '',
+  origin: '',
   lang: DEFAULT_LANG,
   preset: 'default',
   deploy: true

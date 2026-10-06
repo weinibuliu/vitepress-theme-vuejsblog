@@ -81,7 +81,7 @@ export function withDefaults(
   return {
     siteTitle: blog?.siteTitle,
     siteSubtext: blog?.siteSubtext,
-    baseUrl: blog?.baseUrl,
+    origin: blog?.origin,
     author: blog?.author ?? FALLBACK_AUTHOR,
     authorScopes: blog?.authorScopes,
     posts: blog?.posts ?? DEFAULT_POSTS,

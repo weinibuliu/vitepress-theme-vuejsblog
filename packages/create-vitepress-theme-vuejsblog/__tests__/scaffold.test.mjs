@@ -22,7 +22,7 @@ const ANSWERS = {
   title: 'My Blog',
   description: 'Notes on things I build.',
   author: 'Evan You',
-  baseUrl: 'https://example.com',
+  origin: 'https://example.com',
   lang: 'en',
   preset: 'default',
   deploy: true,
@@ -199,14 +199,14 @@ describe('the generated config', () => {
   })
 
   it('leaves a commented line where a missing base url belongs', async () => {
-    const contents = (await build({ baseUrl: '' })).read('.vitepress/config.ts')
+    const contents = (await build({ origin: '' })).read('.vitepress/config.ts')
 
-    expect(contents).toContain("// baseUrl: 'https://example.com',")
-    expect(contents).not.toMatch(/^\s*baseUrl:/m)
+    expect(contents).toContain("// origin: 'https://example.com',")
+    expect(contents).not.toMatch(/^\s*origin:/m)
   })
 
   it('offers no Feed link when there is no Feed', async () => {
-    const contents = (await build({ baseUrl: '' })).read('.vitepress/config.ts')
+    const contents = (await build({ origin: '' })).read('.vitepress/config.ts')
 
     expect(contents).not.toContain('/feed.rss')
     expect((await build()).read('.vitepress/config.ts')).toContain(

@@ -20,7 +20,7 @@ const dist = path.join(root, 'playground/.vitepress/dist')
 /**
  * Where the playground is deployed, as two separate facts.
  *
- * The origin and the mount path are stated in different places — `themeConfig.blog.baseUrl`
+ * The origin and the mount path are stated in different places — `themeConfig.blog.origin`
  * and VitePress's `base` — and keeping them apart is the whole point of the checks below:
  * every URL the build writes is one of the two prefixed to a path, so a build that conflates
  * them links to a directory that does not exist. Both are written here rather than read back
@@ -220,7 +220,7 @@ const feedUrls = [
 /**
  * The base, as one directory name, so a URL can be asked how many times it names it.
  *
- * This is the check the Feed needed and did not have. `baseUrl` used to be read as "the URL of
+ * This is the check the Feed needed and did not have. `origin` used to be read as "the URL of
  * the base": the playground wrote the mount path into it as well, the Theme appended `base`,
  * and every link in the Feed named `/vitepress-theme-vuejsblog/vitepress-theme-vuejsblog/`.
  * The Feed stayed valid XML throughout, which is why nothing but counting occurrences catches

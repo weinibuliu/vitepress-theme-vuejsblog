@@ -4,12 +4,12 @@ import type { Route } from 'vitepress'
  * `path` placed under `prefix` with exactly one `/` between them.
  *
  * Where a Site lives is stated once — VitePress's `base` — and the Theme's origin is stated
- * once, in `themeConfig.blog.baseUrl`. Every URL the Theme emits is one of those prefixes
+ * once, in `themeConfig.blog.origin`. Every URL the Theme emits is one of those prefixes
  * followed by a path, and the two cannot be joined with `+`: VitePress's `base` ends with `/`
  * by its own convention and a Site's paths begin with `/`, so plain concatenation produces
  * `//logo.svg` in the document and a doubled directory in the Feed.
  *
- * An empty `prefix` leaves `path` as written — the case `genFeed`'s `allowMissingBaseUrl`
+ * An empty `prefix` leaves `path` as written — the case `genFeed`'s `allowMissingorigin`
  * creates, where there is no origin to place in front of the path.
  */
 export function joinUrl(prefix: string, path: string): string {
@@ -19,9 +19,9 @@ export function joinUrl(prefix: string, path: string): string {
 }
 
 /**
- * The origin `baseUrl` states, with the Site's `base` removed when the Site wrote it twice.
+ * The origin `origin` states, with the Site's `base` removed when the Site wrote it twice.
  *
- * `baseUrl` is documented as an origin, and the Theme appends VitePress's `base` to it for the
+ * `origin` is documented as an origin, and the Theme appends VitePress's `base` to it for the
  * Feed's absolute links. A Site that reads the field's name as "the URL of the base" writes
  * `https://example.com/blog` — and then both are appended, so every link in the Feed names a
  * directory that does not exist. The repetition is reported rather than silently resolved: an
