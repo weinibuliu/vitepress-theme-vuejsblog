@@ -65,5 +65,8 @@
   "peerDependencies": {
     "vitepress": "2.0.0-alpha.20",
     "vue": "^3.5.0"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

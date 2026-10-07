@@ -48,12 +48,6 @@ my-blog/
 pnpm add vitepress@2.0.0-alpha.20 vue vitepress-theme-vuejsblog
 ```
 
-## 环境要求
-
-Node `^20.19.0 || >=22.12.0`，与 VitePress 2 的要求一致。生成的项目固定
-`vitepress@2.0.0-alpha.20`，因为主题读取 `globalThis.VITEPRESS_CONFIG.site`，
-VitePress 1.x 并不提供。
-
 ## License
 
-MIT
+[MIT](https://github.com/weinibuliu/vitepress-theme-vuejsblog/blob/main/LICENSE)
