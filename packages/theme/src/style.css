@@ -681,6 +681,15 @@
   overflow: hidden;
 }
 
+/**
+  * Fix code-group render
+  */
+.vp-code-group div[class*='language-'] {
+  margin-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 .vp-code-group .tabs {
   gap: 0.25rem;
   /* VitePress bleeds this row 1.5rem into the gutter below 40rem. The Theme's Tabs do not, and
