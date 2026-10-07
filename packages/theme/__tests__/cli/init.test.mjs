@@ -2,9 +2,9 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { parseArgs } from '../src/args.mjs'
-import { collectAnswers, targetState } from '../src/init.mjs'
-import { PACKAGE_MANAGERS } from '../src/constants.mjs'
+import { parseArgs } from '../../cli/args.mjs'
+import { collectAnswers, targetState } from '../../cli/init.mjs'
+import { PACKAGE_MANAGERS } from '../../cli/constants.mjs'
 
 /**
  * The seam between "what the caller said" and "what the Site is built from".

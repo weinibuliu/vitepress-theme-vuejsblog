@@ -11,11 +11,35 @@
 
 ### 从脚手架开始 (推荐)
 
+主题自带 `vitepress-theme-vuejsblog init` 命令，会生成一个已经接好本主题的项目：
+配置、示例内容、品牌色与部署配置。
+
 ```bash
-pnpm create vitepress-theme-vuejsblog@latest my-blog
+npx vitepress-theme-vuejsblog init my-blog
 cd my-blog
-pnpm install
-pnpm dev
+npm install
+npm run dev
+```
+
+生成的项目：
+
+```
+my-blog/
+├── .github/workflows/deploy.yml   构建并发布到 GitHub Pages
+├── .vitepress/
+│   ├── config.ts                  站点配置：标题、作者、导航、页脚、Feed
+│   └── theme/
+│       ├── index.ts               把主题交给 VitePress
+│       └── theme.css              品牌色与自定义样式
+├── index.md                       博客首页
+├── about.md                       一个 Page 示例
+├── posts/
+│   ├── hello-world.md             一篇 Post
+│   └── a-draft.md                 一篇 Draft：开发时可见，构建时排除
+├── public/logo.svg                导航图标与 favicon
+├── vercel.json                    Vercel 无需额外配置
+├── package.json
+└── tsconfig.json
 ```
 
 ### 手动安装
@@ -23,3 +47,13 @@ pnpm dev
 ```bash
 pnpm add vitepress@2.0.0-alpha.20 vue vitepress-theme-vuejsblog
 ```
+
+## 环境要求
+
+Node `^20.19.0 || >=22.12.0`，与 VitePress 2 的要求一致。生成的项目固定
+`vitepress@2.0.0-alpha.20`，因为主题读取 `globalThis.VITEPRESS_CONFIG.site`，
+VitePress 1.x 并不提供。
+
+## License
+
+MIT

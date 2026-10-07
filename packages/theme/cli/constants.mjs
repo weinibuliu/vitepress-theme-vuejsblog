@@ -1,16 +1,22 @@
+import { manifest } from './manifest.mjs'
+
 /**
  * The facts the scaffolder would otherwise have to guess, in one place.
  *
- * Nothing here is fetched: a scaffold has to work offline and from a tarball, so
- * every version is a literal. `__tests__/constants.test.mjs` compares the two that
- * are a promise about the Theme against the Theme's own `package.json`, because a
- * drifted pin is the one mistake in this file that would not fail loudly here.
+ * Nothing here is fetched: a scaffold has to work offline and from a tarball, so the
+ * versions are either literals or read from the package's own manifest.
+ * `__tests__/cli/constants.test.mjs` compares the literals that are a promise about the
+ * Theme against that same manifest, because a drifted pin is the one mistake in this
+ * file that would not fail loudly here.
+ *
+ * The Theme's own version is not a literal: the CLI ships inside the package it
+ * scaffolds a Site for, so the range it writes is `^<this release>`, which cannot
+ * drift the way a hand-copied number can.
  */
 
-export const PACKAGE_NAME = 'create-vitepress-theme-vuejsblog'
-
 /**
- * The Theme this scaffolds a Site for.
+ * The Theme this scaffolds a Site for — and the package the CLI ships in, so the bin
+ * name, the package name and this constant are one string.
  */
 export const THEME_PACKAGE = 'vitepress-theme-vuejsblog'
 
@@ -18,7 +24,7 @@ export const THEME_PACKAGE = 'vitepress-theme-vuejsblog'
  * The Theme's version range. The Theme is a peer of no one, so a caret range is
  * right: the Site's config is stable across the Theme's minor releases.
  */
-export const THEME_VERSION = '^0.1.5'
+export const THEME_VERSION = `^${manifest.version}`
 
 /**
  * VitePress 2 is an alpha and the Theme reads `globalThis.VITEPRESS_CONFIG.site`,

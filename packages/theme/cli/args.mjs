@@ -1,4 +1,3 @@
-import process from 'node:process'
 import { DEFAULT_LANG, PACKAGE_MANAGERS, PRESETS } from './constants.mjs'
 
 /**
@@ -73,8 +72,9 @@ const VALUE_FLAGS = {
 /**
  * Parse an argv slice — `process.argv.slice(2)`, so no program name.
  *
- * The one positional is the target directory, matching every other `create-`
- * package: `npm create vitepress-theme-vuejsblog my-blog`.
+ * The one positional is the target directory, as in VitePress's own `vitepress init`:
+ * `vitepress-theme-vuejsblog init my-blog`. The command word itself was stripped by
+ * `run` before this parser saw anything.
  */
 export function parseArgs(argv) {
   const result = {
@@ -203,33 +203,34 @@ export const OPTION_DEFAULTS = {
 }
 
 /**
- * The one way these flags go missing before they arrive.
+ * The help for the programme itself — the commands, before any one of them is chosen.
  *
- * `npm create` parses the command line first, and `--yes`, `--force`, `--install` and
- * `--help` are all names npm answers to itself — so they are read as npm's own config
- * and this process never sees them. What npm does forward is everything after a lone
- * `--`, which is why every other `create-` package's README asks for one. `npm create`
- * is `npm init`, so `npm_command=init` is npm saying that is what happened.
- *
- * Read from the environment but passed in, so that a test can say what npm was.
+ * It is separate from `HELP` because a command's options are meaningless until the
+ * command is. `--help` with no command prints this; `init --help` prints `HELP`.
  */
-export function npmForwardingHint(env = process.env) {
-  if (env.npm_command !== 'init') return undefined
-  return (
-    'npm keeps the flags it recognises for itself, so they never reach this CLI.\n' +
-    'Pass them after a --:  npm create vitepress-theme-vuejsblog my-blog -- --yes'
-  )
-}
+export const ROOT_HELP = `Scaffold a VitePress blog that uses the vitepress-theme-vuejsblog theme.
+
+Usage
+  npx vitepress-theme-vuejsblog <command> [options]
+  pnpm dlx vitepress-theme-vuejsblog <command> [options]
+
+Commands
+  init [directory]  Scaffold a new Site that uses the Theme
+
+Options
+  -h, --help        Show this help
+  -v, --version     Show the version
+
+Run \`vitepress-theme-vuejsblog init --help\` to see what init accepts.
+`
 
 export const HELP = `Scaffold a VitePress blog that uses the vitepress-theme-vuejsblog theme.
 
 Usage
-  npm create vitepress-theme-vuejsblog [directory] [options]
-  pnpm create vitepress-theme-vuejsblog [directory] [options]
-
-  npm answers to --yes, --force and --help itself, so through npm the flags come
-  after a lone --:  npm create vitepress-theme-vuejsblog my-blog -- --yes
-  pnpm, yarn and bun forward them directly.
+  npx vitepress-theme-vuejsblog init [directory] [options]
+  pnpm dlx vitepress-theme-vuejsblog init [directory] [options]
+  yarn dlx vitepress-theme-vuejsblog init [directory] [options]
+  bunx vitepress-theme-vuejsblog init [directory] [options]
 
   The directory defaults to "my-blog". Without --yes the CLI asks for everything it
   was not told; in a shell with no TTY it uses the defaults instead of hanging.

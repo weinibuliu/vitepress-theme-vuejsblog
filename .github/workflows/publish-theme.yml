@@ -2,6 +2,11 @@ name: Publish Theme
 
 # Publishes `vitepress-theme-vuejsblog` (packages/theme) to npm.
 #
+# The package is both the Theme and the `vitepress-theme-vuejsblog init` CLI that
+# scaffolds a Site for it, so one release carries both. The CLI is plain ESM under
+# `cli/` with no build step; only the Theme's `dist/` has to be compiled before the
+# tarball is packed.
+#
 # Two ways in, and they mean different things:
 #
 #   * pushing a `theme-v<version>` tag publishes that version, and the tag must agree
@@ -99,6 +104,11 @@ jobs:
       - name: Install Dependency
         run: pnpm install
 
+      # The suite covers the Theme and the CLI that ships with it. Publishing is the
+      # last moment a failing test is cheap; after this the version is permanent.
+      - name: Test
+        run: pnpm test
+
       - name: Build Theme
         run: pnpm --filter vitepress-theme-vuejsblog build
 
@@ -110,6 +120,15 @@ jobs:
           for file in dist/index.js dist/index.d.ts dist/feed.js dist/style.css; do
             if [ ! -f "packages/theme/$file" ]; then
               echo "::error::Theme build is missing $file"
+              exit 1
+            fi
+          done
+          # The CLI is not compiled, but the tarball is useless without it: `bin`
+          # points at a file npm only ships because `files` names `cli/`, and the
+          # templates travel inside it.
+          for file in cli/bin.mjs cli/templates/.gitignore.tpl; do
+            if [ ! -f "packages/theme/$file" ]; then
+              echo "::error::CLI is missing $file"
               exit 1
             fi
           done

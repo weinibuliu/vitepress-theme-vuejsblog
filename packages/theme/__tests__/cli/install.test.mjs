@@ -3,8 +3,8 @@ import {
   detectPnpmVersion,
   initGit,
   installDependencies
-} from '../src/install.mjs'
-import { FALLBACK_PNPM_VERSION } from '../src/constants.mjs'
+} from '../../cli/install.mjs'
+import { FALLBACK_PNPM_VERSION } from '../../cli/constants.mjs'
 
 /**
  * A fake `spawnSync` that answers in order and remembers what it was asked to do.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { UsageError, npmForwardingHint, parseArgs } from '../src/args.mjs'
+import { ROOT_HELP, UsageError, parseArgs } from '../../cli/args.mjs'
 
 /**
  * The flags are this package's published interface, so they are tested as an
@@ -43,7 +43,7 @@ describe('parseArgs', () => {
     expect(parseArgs(['--no-deploy']).options.deploy).toBe(false)
   })
 
-  it('ignores the bare -- npm leaves behind when it forwards arguments', () => {
+  it('ignores the bare -- a package manager leaves behind when it forwards arguments', () => {
     const args = parseArgs(['site', '--', '--title', 'Notes'])
 
     expect(args.targetDir).toBe('site')
@@ -92,18 +92,13 @@ describe('parseArgs', () => {
   })
 })
 
-describe('npmForwardingHint', () => {
-  it('says nothing when npm is not the caller', () => {
-    expect(npmForwardingHint({})).toBeUndefined()
-    expect(npmForwardingHint({ npm_command: 'run-script' })).toBeUndefined()
+describe('ROOT_HELP', () => {
+  it('names the init command, since it is the only one', () => {
+    expect(ROOT_HELP).toContain('init [directory]')
   })
 
-  it('names the -- separator when npm create is the caller', () => {
-    // `npm create` is `npm init`, and --yes is a name npm answers to itself, so the
-    // flag only arrives on the far side of a --.
-    const hint = npmForwardingHint({ npm_command: 'init' })
-
-    expect(hint).toContain('-- --yes')
-    expect(hint).toContain('npm keeps the flags')
+  it('points at the command help rather than repeating the options', () => {
+    expect(ROOT_HELP).toContain('init --help')
+    expect(ROOT_HELP).not.toContain('--package-manager')
   })
 })

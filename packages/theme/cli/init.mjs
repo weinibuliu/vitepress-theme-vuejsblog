@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, statSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
@@ -14,20 +14,13 @@ import {
   text
 } from '@clack/prompts'
 
-import {
-  HELP,
-  OPTION_DEFAULTS,
-  UsageError,
-  npmForwardingHint,
-  parseArgs
-} from './args.mjs'
+import { HELP, OPTION_DEFAULTS, UsageError, parseArgs } from './args.mjs'
 import {
   BRAND_PRESET_DIR,
   DEFAULT_LANG,
   DEFAULT_TARGET,
   FALLBACK_PNPM_VERSION,
   NODE_TYPES_VERSION,
-  PACKAGE_NAME,
   PRESETS,
   PRESET_MARKS,
   THEME_PACKAGE,
@@ -36,6 +29,7 @@ import {
   VUE_VERSION
 } from './constants.mjs'
 import { detectPnpmVersion, initGit, installDependencies } from './install.mjs'
+import { manifest } from './manifest.mjs'
 import { template } from './templates.mjs'
 import {
   detectPackageManager,
@@ -57,10 +51,6 @@ import {
  * to hold three signatures in their head to know what a scaffold does. `init` asks and
  * orchestrates; `scaffold` turns answers into a directory.
  */
-
-const manifest = JSON.parse(
-  readFileSync(new URL('../package.json', import.meta.url), 'utf8')
-)
 
 /** What each package manager calls the scripts the generated README documents. */
 const INSTALL_COMMAND = {
@@ -388,8 +378,6 @@ export async function init(argv = process.argv.slice(2), options = {}) {
     if (!(error instanceof UsageError)) throw error
     process.exitCode = 1
     log.error(error.message)
-    const hint = npmForwardingHint()
-    if (hint) log.warn(hint)
     log.info('Run with --help to see the options.')
     return { ok: false, reason: error.message }
   }
@@ -406,19 +394,12 @@ export async function init(argv = process.argv.slice(2), options = {}) {
 
   const interactive = !args.yes && isInteractive(stdin, stdout)
 
-  intro(`${PACKAGE_NAME} v${manifest.version}`)
+  intro(`${THEME_PACKAGE} init v${manifest.version}`)
 
   if (!interactive && !args.yes) {
     log.info(
       'No TTY was found, so the defaults are used. Flags choose anything else.'
     )
-  }
-
-  // A flag npm swallowed leaves no error behind, only a question that should not have
-  // been asked, so the hint belongs where a prompt is about to be.
-  if (interactive) {
-    const hint = npmForwardingHint()
-    if (hint) log.warn(hint)
   }
 
   const answers = await collectAnswers(args, interactive)

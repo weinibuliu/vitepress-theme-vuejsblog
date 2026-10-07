@@ -170,9 +170,9 @@ _Avoid_: reverse order, ascending sort
 ### Scaffolding
 
 **Scaffolder**:
-The `create-vitepress-theme-vuejsblog` package, which writes a new Site's first files —
-Theme Config, sample content, brand colour and deploy config. It produces a Site and
-owns no content of its own.
+The `vitepress-theme-vuejsblog init` command, shipped inside the Theme package, which
+writes a new Site's first files — Theme Config, sample content, brand colour and deploy
+config. It produces a Site and owns no content of its own.
 _Avoid_: template, starter, boilerplate, generator
 
 **Generated Site**:

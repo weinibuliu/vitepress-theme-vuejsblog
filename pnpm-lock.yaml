@@ -191,20 +191,17 @@ importers:
         specifier: 3.5.41
         version: 3.5.41(typescript@5.6.3)
 
-  packages/create-vitepress-theme-vuejsblog:
+  packages/theme:
     dependencies:
       '@clack/prompts':
         specifier: ^1.8.1
         version: 1.8.1
-      eta:
-        specifier: ^4.6.0
-        version: 4.6.0
-
-  packages/theme:
-    dependencies:
       '@mdit/plugin-tab':
         specifier: ^2.0.2
         version: 2.0.2
+      eta:
+        specifier: ^4.6.0
+        version: 4.6.0
       feed:
         specifier: ^4.2.2
         version: 4.2.2

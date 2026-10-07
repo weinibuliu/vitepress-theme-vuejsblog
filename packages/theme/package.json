@@ -17,9 +17,13 @@
     "url": "git+https://github.com/weinibuliu/vitepress-theme-vuejsblog.git",
     "directory": "packages/theme"
   },
+  "bin": {
+    "vitepress-theme-vuejsblog": "./cli/bin.mjs"
+  },
   "files": [
     "dist",
     "src",
+    "cli",
     "presets",
     "config.js",
     "config.d.ts",
@@ -51,7 +55,9 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@clack/prompts": "^1.8.1",
     "@mdit/plugin-tab": "^2.0.2",
+    "eta": "^4.6.0",
     "feed": "^4.2.2",
     "gray-matter": "^4.0.3",
     "vitepress-plugin-group-icons": "^1.7.6"

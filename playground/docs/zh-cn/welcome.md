@@ -44,17 +44,17 @@ import { BlogAuthor } from "vitepress-theme-vuejsblog"
 :::code-group
 
 ```bash [pnpm]
-pnpm create vitepress-theme-vuejsblog@latest my-blog --yes
+pnpm dlx vitepress-theme-vuejsblog init my-blog --yes
 cd my-blog
 pnpm install
 pnpm dev
 ```
 
 ```bash [npm]
-npm create vitepress-theme-vuejsblog@latest my-blog -- --yes
+npx vitepress-theme-vuejsblog init my-blog --yes
 cd my-blog
 npm install
-npm dev
+npm run dev
 ```
 
 :::

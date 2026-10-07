@@ -9,7 +9,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { scaffold } from '../src/init.mjs'
+import { scaffold } from '../../cli/init.mjs'
 
 /**
  * The template directory and the generated tree, kept in step.
@@ -20,7 +20,12 @@ import { scaffold } from '../src/init.mjs'
  * as a missing-file error at runtime). The third check is the packaging trap below.
  */
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const root = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  'cli'
+)
 const templates = path.join(root, 'templates')
 
 const ANSWERS = {
@@ -79,14 +84,15 @@ describe('the template directory', () => {
     expect(orphans).toEqual([])
   })
 
-  it('ships the templates, by listing them in the package manifest', () => {
+  it('ships the templates, by listing the CLI directory in the package manifest', () => {
     // The failure this guards passes every other test in the repository: the templates
-    // are on disk, the scaffold works, and the tarball contains none of them.
+    // are on disk, the scaffold works, and the tarball contains none of them. The
+    // templates live under `cli/`, which is what `files` has to name.
     const manifest = JSON.parse(
-      readFileSync(path.join(root, 'package.json'), 'utf8')
+      readFileSync(path.join(root, '..', 'package.json'), 'utf8')
     )
 
-    expect(manifest.files).toContain('templates')
+    expect(manifest.files).toContain('cli')
   })
 
   it('names the gitignore template with a suffix, because npm drops the bare name', () => {

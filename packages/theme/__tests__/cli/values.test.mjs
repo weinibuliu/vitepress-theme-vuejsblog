@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PACKAGE_MANAGERS } from '../src/constants.mjs'
+import { PACKAGE_MANAGERS } from '../../cli/constants.mjs'
 import {
   detectPackageManager,
   escapeHtml,
@@ -9,7 +9,7 @@ import {
   packageNameFromDirectory,
   quote,
   titleFromDirectory
-} from '../src/values.mjs'
+} from '../../cli/values.mjs'
 
 /**
  * The spelling rules, and the two names derived from a directory.

@@ -12,13 +12,13 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 /**
- * Scaffold a Site with `create-vitepress-theme-vuejsblog` and build it.
+ * Scaffold a Site with `vitepress-theme-vuejsblog init` and build it.
  *
  * The unit tests say what the generated files contain; only a build says the Site they
  * describe is a Site. Everything here is checked against VitePress's own output, so a
  * config that reads correctly but does not typecheck, a preset import that Vite cannot
  * resolve, or a Feed that never gets written all fail here rather than in the hands of
- * whoever ran `npm create` first.
+ * whoever ran `npx vitepress-theme-vuejsblog init` first.
  *
  * The generated Site is linked to the workspace Theme rather than installed from a
  * registry: `verify-package.mjs` already covers the registry path for the Theme
@@ -26,12 +26,9 @@ import { fileURLToPath } from 'node:url'
  */
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const cli = path.join(
-  root,
-  'packages/create-vitepress-theme-vuejsblog/index.mjs'
-)
+const cli = path.join(root, 'packages/theme/cli/bin.mjs')
 const theme = path.join(root, 'packages/theme')
-const workspace = path.join(root, 'node_modules/.verify-create')
+const workspace = path.join(root, 'node_modules/.verify-scaffold')
 const site = path.join(workspace, 'my-blog')
 const dist = path.join(site, '.vitepress/dist')
 
@@ -85,7 +82,7 @@ function scaffoldArgs(overrides = {}, flags = []) {
 
 /** Run the scaffolder CLI and report how it ended, without throwing on a non-zero exit. */
 function scaffold(args, options = {}) {
-  const result = spawnSync('node', [cli, ...args], {
+  const result = spawnSync('node', [cli, 'init', ...args], {
     cwd: options.cwd ?? workspace,
     encoding: 'utf8'
   })

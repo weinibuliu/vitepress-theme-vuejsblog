@@ -8,25 +8,26 @@ import {
   THEME_VERSION,
   VITEPRESS_VERSION,
   VUE_VERSION
-} from '../src/constants.mjs'
+} from '../../cli/constants.mjs'
 
 /**
- * The constant that matters is the one that is a promise about another package.
+ * The constants that matter are the ones that are a promise about another package.
  *
- * `THEME_VERSION` and `VITEPRESS_VERSION` are duplicated rather than imported, because
- * a published scaffolder cannot reach into its sibling at run time. Duplication is
- * fine as long as something notices when they diverge — this is that something, and
- * it reads the Theme's real manifest rather than a copy of it.
+ * `VITEPRESS_VERSION` is a literal rather than a read of the manifest, because the
+ * generated Site's VitePress pin is a value to review rather than one to inherit;
+ * `THEME_VERSION` is derived, and this test is what proves the derivation still names
+ * the package that exists. The manifest is read from disk rather than imported, so the
+ * check does not simply agree with the code it is checking.
  */
 const themeManifest = JSON.parse(
   readFileSync(
-    path.join(import.meta.dirname, '..', '..', 'theme', 'package.json'),
+    path.join(import.meta.dirname, '..', '..', 'package.json'),
     'utf8'
   )
 )
 
 describe('constants', () => {
-  it('pins the Theme version to the Theme that exists', () => {
+  it('pins the Theme version to the release that ships this CLI', () => {
     expect(THEME_VERSION).toBe(`^${themeManifest.version}`)
   })
 

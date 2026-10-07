@@ -13,11 +13,11 @@
     "fmt": "oxfmt --write .",
     "fmt:check": "oxfmt --check .",
     "lint": "oxlint --vue-plugin .",
-    "create": "node packages/create-vitepress-theme-vuejsblog/index.mjs",
+    "scaffold": "node packages/theme/cli/bin.mjs init",
     "verify": "node scripts/verify-build.mjs",
     "verify:package": "node scripts/verify-package.mjs",
-    "verify:create": "node scripts/verify-create.mjs",
-    "check": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm verify && pnpm verify:package && pnpm verify:create"
+    "verify:scaffold": "node scripts/verify-scaffold.mjs",
+    "check": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm verify && pnpm verify:package && pnpm verify:scaffold"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",

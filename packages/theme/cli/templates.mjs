@@ -31,7 +31,7 @@ import { Eta } from 'eta'
  * name `title` instead of `it.title`, and call `quote()` and `literal()` directly.
  */
 
-const ROOT = new URL('../templates/', import.meta.url)
+const ROOT = new URL('./templates/', import.meta.url)
 
 const eta = new Eta({
   useWith: true,

@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { scaffold } from '../src/init.mjs'
+import { scaffold } from '../../cli/init.mjs'
 
 /**
  * The Site, as text on disk.

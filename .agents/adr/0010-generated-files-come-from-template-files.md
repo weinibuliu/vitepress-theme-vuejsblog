@@ -1,5 +1,10 @@
 # The Scaffolder's generated files come from template files
 
+> [!NOTE]
+> The scaffolder has since been folded into the Theme package as its `init` command, so
+> the `create-vitepress-theme-vuejsblog` package named below no longer exists. The
+> decision this record documents — templates as files under `templates/` — is unchanged.
+
 The `create-vitepress-theme-vuejsblog` package used to build every file it scaffolds
 inside `src/files.mjs`: a function per file, an array of `lines.push(…)`, and the prose
 a Site's author would end up reading embedded in JavaScript string literals. It now
