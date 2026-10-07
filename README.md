@@ -11,8 +11,7 @@
 
 ### 从脚手架开始 (推荐)
 
-主题自带 `vitepress-theme-vuejsblog init` 命令，会生成一个已经接好本主题的项目：
-配置、示例内容、品牌色与部署配置。
+主题自带 `vitepress-theme-vuejsblog init` 命令。
 
 ```bash
 npx vitepress-theme-vuejsblog init my-blog
@@ -45,7 +44,7 @@ my-blog/
 ### 手动安装
 
 ```bash
-pnpm add vitepress@2.0.0-alpha.20 vue vitepress-theme-vuejsblog
+pnpm add vitepress@2.0.0-alpha.20 vitepress-theme-vuejsblog vue
 ```
 
 ## License
