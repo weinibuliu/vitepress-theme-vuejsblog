@@ -65,9 +65,7 @@ exclude: true # <- Marked as exclude
 
 如果文件不是文章，或者不便于通过 `frontmatter` 进行排除 —— 比如一个在内容目录内的 `README.md` 文件(它可能需要在 Github 中进行渲染)。
 
-```ts
-// .vitepress/config.ts
-
+```ts [.vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   extends: blogConfig(path.resolve(import.meta.dirname, '..')),
   srcExclude: ['docs/README.md']

@@ -67,9 +67,7 @@ It is for files that are not Posts — a `README.md` sitting in a content direct
 
 If the file is post, we recommend to mark as excluded at `frontmatter`.
 
-```ts
-// .vitepress/config.ts
-
+```ts [.vitepress/config.ts]
 export default defineConfig<ThemeConfig>({
   extends: blogConfig(path.resolve(import.meta.dirname, '..')),
   srcExclude: ['docs/README.md']
