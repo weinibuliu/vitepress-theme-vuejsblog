@@ -1,6 +1,6 @@
 {
   "name": "vitepress-theme-vuejsblog",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A personal-blog theme for VitePress in the style of blog.vuejs.org",
   "keywords": [
     "blog",
