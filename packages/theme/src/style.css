@@ -685,6 +685,7 @@
   * Fix code-group render
   */
 .vp-code-group div[class*='language-'] {
+  margin-inline: 0;
   margin-bottom: 0;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
