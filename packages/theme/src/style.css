@@ -654,6 +654,38 @@
   }
 }
 
+/* ------------------------------------------------------------- code blocks */
+
+/**
+ * VitePress builds its code block for its own layout. Below 40rem `vp-doc.css` states
+ * `margin: 1rem -1.5rem` on `div[class*='language-']` and `.vp-block`, and takes the radius back:
+ * the block runs past the paragraph's column into a 1.5rem gutter, the width VitePress's default
+ * layout reserves. The Theme's gutter is `--vp-blog-layout-gutter`, and every other component
+ * here — Tabs, Code Groups, custom blocks, images — stays inside it. A code block is not the one
+ * thing to widen on a narrow page, so it keeps the column, and the rounded corners the wider
+ * shape took away.
+ */
+@media not all and (min-width: 40rem) {
+  .vp-doc div[class*='language-'],
+  .vp-block {
+    margin-inline: 0;
+    border-radius: 0.5rem;
+  }
+
+  /* VitePress states the list case as half a radius, for the bleed this removes. */
+  .vp-doc li div[class*='language-'] {
+    border-radius: 0.5rem;
+  }
+
+  /* `vitepress-plugin-group-icons` bleeds the bar it prints above a titled block along with the
+     block. Its 12px row padding plus the title's own 12px already equal the `code` padding, so
+     only the margin comes back — and the selector has to outrank the plugin's stylesheet, which
+     loads after this one. */
+  .vp-doc .vp-code-block-title-bar {
+    margin-inline: 0;
+  }
+}
+
 /* ------------------------------------------------------------- code groups */
 
 /**
